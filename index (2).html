@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>บทเรียนสำเร็จรูป: กฎความปลอดภัยและการตัดระบบฉุกเฉิน</title>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@500;600;700&family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===== ธีม "เวิร์กช็อปช่าง" (แก้สีได้ที่นี่) ===== */
+:root{
+  --bg:#15181d; --card:#232830; --card2:#2b313a; --ink:#eef1f5; --muted:#a3adbb; --line:#3b434f;
+  --pri:#ffc400; --pri-ink:#1a1a1a; --pri-soft:rgba(255,196,0,.14);
+  --ok:#34d27b; --ok-soft:rgba(52,210,123,.14); --bad:#ff5a4f; --bad-soft:rgba(255,90,79,.14);
+  --warn:#ffb020; --warn-soft:rgba(255,176,32,.13); --info:#5fb3ff; --info-soft:rgba(95,179,255,.13);
+  --hazard:repeating-linear-gradient(-45deg,#ffc400 0 14px,#1a1a1a 14px 28px);
+}
+*{box-sizing:border-box}
+body{margin:0;color:var(--ink);font-family:"Sarabun","Noto Sans Thai",Tahoma,sans-serif;font-size:17px;line-height:1.6;
+  background:#15181d;
+  background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.018) 0 2px,transparent 2px 6px),radial-gradient(circle at 50% -10%,#2a3038 0,#15181d 60%);
+  background-attachment:fixed;min-height:100vh}
+h2,h3,.t2,.btn,.big,.rank-name,.badge,.steps div{font-family:"Kanit","Sarabun",sans-serif}
+.wrap{max-width:780px;margin:0 auto;padding:12px 12px 40px}
+/* ส่วนหัว: แถบเตือนเหลือง-ดำ */
+header.top{position:relative;background:linear-gradient(160deg,#2d333c,#1d2127);border:1px solid #444c58;border-radius:16px;overflow:hidden;margin-bottom:10px;box-shadow:0 6px 20px rgba(0,0,0,.4)}
+header.top .hz{height:10px;background:var(--hazard)}
+header.top .in{padding:10px 16px 12px;display:flex;gap:12px;align-items:center}
+.logo{flex:0 0 52px;height:52px;border-radius:12px;background:var(--pri);display:grid;place-items:center;font-size:30px;box-shadow:inset 0 -4px 0 rgba(0,0,0,.25)}
+.logo span{animation:flick 3.5s infinite}
+@keyframes flick{0%,92%,100%{opacity:1}93%{opacity:.25}95%{opacity:1}96%{opacity:.4}}
+header.top .t1{font-size:12.5px;color:var(--muted);line-height:1.35}
+header.top .t2{font-size:20px;font-weight:700;line-height:1.3;color:#fff}
+.who{font-size:13px;color:var(--pri);margin-top:2px}
+/* ยศช่าง + แถบ XP */
+.rankbar{display:flex;align-items:center;gap:10px;padding:8px 16px;background:rgba(0,0,0,.25);border-top:1px solid #3b434f}
+.rank-ico{font-size:24px}
+.rank-name{font-weight:700;font-size:15px;color:var(--pri);white-space:nowrap}
+.xp{flex:1}
+.xp .bar{height:9px;background:#0f1215;border-radius:6px;overflow:hidden;border:1px solid #3b434f}
+.xp .bar i{display:block;height:100%;background:linear-gradient(90deg,#ffc400,#ff8a00);transition:width .8s cubic-bezier(.2,.8,.2,1)}
+.xp .lb{font-size:11.5px;color:var(--muted);display:flex;justify-content:space-between}
+/* แถบขั้นตอน */
+.steps{display:flex;gap:4px;margin:8px 0 12px}
+.steps div{flex:1;text-align:center;font-size:12px;padding:6px 2px;border-radius:8px;background:#232830;border:1px solid #3b434f;color:var(--muted);line-height:1.2}
+.steps div.done{background:var(--ok-soft);border-color:#2a7a4f;color:var(--ok)}
+.steps div.now{background:var(--pri);border-color:var(--pri);color:var(--pri-ink);font-weight:700;box-shadow:0 0 14px rgba(255,196,0,.45)}
+/* การ์ดแบบแผ่นเหล็ก มีหมุดย้ำ 4 มุม */
+.card{position:relative;background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:14px;padding:18px 16px;margin-bottom:12px;box-shadow:0 4px 14px rgba(0,0,0,.35);animation:rise .35s ease-out both}
+.card::before{content:"";position:absolute;inset:7px;pointer-events:none;
+  background:radial-gradient(circle,#59616d 0 2.2px,transparent 2.6px) top left/9px 9px no-repeat,radial-gradient(circle,#59616d 0 2.2px,transparent 2.6px) top right/9px 9px no-repeat,radial-gradient(circle,#59616d 0 2.2px,transparent 2.6px) bottom left/9px 9px no-repeat,radial-gradient(circle,#59616d 0 2.2px,transparent 2.6px) bottom right/9px 9px no-repeat}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+h2{font-size:22px;margin:0 0 8px;line-height:1.35;font-weight:600}
+h3{font-size:18px;margin:12px 0 6px;color:var(--pri);font-weight:600}
+p{margin:6px 0}
+b{color:#fff}
+.muted{color:var(--muted);font-size:15px}
+.tag{display:inline-block;font-family:"Kanit",sans-serif;font-size:12px;letter-spacing:.5px;padding:2px 10px;border-radius:4px;background:#111;color:var(--pri);border:1px solid #444}
+/* ปุ่มเหลืองแบบกดยุบ */
+.btn{display:inline-block;border:0;border-radius:10px;padding:12px 18px;font-size:17px;font-weight:600;cursor:pointer;background:var(--pri);color:var(--pri-ink);min-height:50px;box-shadow:0 4px 0 #a37d00;transition:transform .08s,box-shadow .08s}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #a37d00}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.btn.ghost{background:transparent;color:var(--pri);border:2px solid var(--pri);box-shadow:none}
+.btn.ok{background:var(--ok);color:#06210f;box-shadow:0 4px 0 #1d8a4e}
+.btn.full{width:100%}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.row.end{justify-content:flex-end}.row.between{justify-content:space-between}
+label.f{display:block;font-weight:600;margin:10px 0 4px}
+input,select{width:100%;font:inherit;padding:11px 12px;border:2px solid var(--line);border-radius:10px;background:#15181d;color:var(--ink)}
+input:focus,select:focus{outline:none;border-color:var(--pri);box-shadow:0 0 0 3px var(--pri-soft)}
+.err{color:var(--bad);font-size:14px;min-height:20px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+/* ตัวเลือกคำตอบ */
+.opt{display:block;width:100%;text-align:left;border:2px solid var(--line);background:#1b1f25;border-radius:12px;padding:11px 14px;margin:8px 0;font:inherit;cursor:pointer;color:var(--ink);transition:border-color .15s,background .15s,transform .1s}
+.opt:hover{border-color:#6b7480}
+.opt:active{transform:scale(.99)}
+.opt b{margin-right:6px;color:var(--pri)}
+.opt.sel{border-color:var(--pri);background:var(--pri-soft)}
+.opt.right{border-color:var(--ok);background:var(--ok-soft);animation:pop .35s}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft);animation:sh .35s}
+@keyframes pop{50%{transform:scale(1.03)}}
+.fb{border-radius:10px;padding:10px 14px;margin-top:10px;font-size:15.5px;border-left:4px solid}
+.fb.ok{background:var(--ok-soft);color:#c9f5dc;border-color:var(--ok)}
+.fb.bad{background:var(--bad-soft);color:#ffd6d3;border-color:var(--bad)}
+.fb.info{background:var(--info-soft);color:#d4e9ff;border-color:var(--info)}
+.fb.warn{background:var(--warn-soft);color:#ffe7b8;border-color:var(--warn)}
+.pbar{height:8px;background:#0f1215;border-radius:8px;overflow:hidden;margin:6px 0 12px;border:1px solid #333a44}
+.pbar i{display:block;height:100%;background:var(--hazard);transition:width .5s}
+.key{background:#1b1f25;border:2px dashed var(--pri);padding:10px 12px;border-radius:10px;margin:10px 0}
+ul.tight,ol.tight{margin:6px 0;padding-left:22px} ul.tight li,ol.tight li{margin:4px 0}
+.pill{display:inline-block;padding:1px 10px;border-radius:20px;font-size:12.5px;font-weight:700}
+.pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.bad{background:var(--bad-soft);color:var(--bad)} .pill.warn{background:var(--warn-soft);color:var(--warn)}
+svg{max-width:100%;height:auto;display:block;margin:0 auto}
+/* จอแสดงภาพจำลอง (พื้นสว่างเพื่อให้ภาพชัด) */
+.scene{position:relative;overflow:hidden;background:linear-gradient(#eef1f5,#dfe4ea);border:3px solid #49515d;border-radius:12px;padding:8px;margin:8px 0;color:#1d2433;box-shadow:inset 0 0 0 2px #bfc6cf}
+.scene .muted{color:#4a5466}
+.scene.flash-bad{animation:fbad .45s}
+@keyframes fbad{30%{box-shadow:inset 0 0 0 6px #ff5a4f}}
+.scene.flash-ok{animation:fok .45s}
+@keyframes fok{30%{box-shadow:inset 0 0 0 6px #34d27b}}
+/* อนุภาค: ประกายไฟ / หยดน้ำ / ดาว */
+.pt{position:absolute;width:7px;height:7px;border-radius:50%;pointer-events:none;animation:fly .7s ease-out forwards}
+.pt.spark{background:#ffd23f;box-shadow:0 0 8px #ffb000,0 0 2px #fff}
+.pt.drop{background:#4fb2ff;border-radius:50% 50% 50% 0;width:8px;height:8px}
+.pt.star{background:#34d27b;box-shadow:0 0 8px #34d27b}
+@keyframes fly{from{transform:translate(0,0) scale(1);opacity:1}to{transform:translate(var(--dx),var(--dy)) scale(.3);opacity:0}}
+/* น้ำพุ่งใน SVG */
+.spray{stroke-dasharray:6 6;animation:flow .5s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-24}}
+/* แบบจำลอง */
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.act{border:2px solid var(--line);background:#1b1f25;border-radius:12px;padding:10px;font:inherit;font-size:15.5px;cursor:pointer;text-align:left;min-height:58px;color:var(--ink);line-height:1.35;transition:transform .1s,border-color .15s}
+.act:hover{border-color:var(--pri)}
+.act:active{transform:scale(.98)}
+.act.done{background:var(--ok-soft);border-color:var(--ok);color:#c9f5dc;cursor:default;animation:pop .35s}
+.act.shake,.shake{animation:sh .35s}
+@keyframes sh{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+.hud{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
+.hud span{background:#0f1215;border:1px solid #3b434f;border-radius:8px;padding:4px 12px;font-size:15px;font-weight:700;font-family:"Kanit",sans-serif;font-variant-numeric:tabular-nums}
+.hud .late{color:var(--bad);border-color:var(--bad)}
+.checklist{margin:8px 0;padding-left:0;list-style:none}
+.checklist li{padding:3px 0;font-size:15px;animation:rise .3s both}
+.order-cards .act{grid-column:span 2}
+/* เหรียญรางวัล */
+.medal{display:inline-grid;place-items:center;width:96px;height:96px;border-radius:50%;font-size:52px;margin:6px auto;animation:medal .8s cubic-bezier(.2,1.6,.4,1) both}
+.medal.g{background:radial-gradient(circle at 35% 30%,#fff3b0,#ffc400 45%,#a37d00);box-shadow:0 0 30px rgba(255,196,0,.6)}
+.medal.s{background:radial-gradient(circle at 35% 30%,#fff,#c5ccd6 45%,#7a8594);box-shadow:0 0 24px rgba(200,210,220,.5)}
+.medal.b{background:radial-gradient(circle at 35% 30%,#ffd9b8,#cd7f32 45%,#7a4a1c);box-shadow:0 0 24px rgba(205,127,50,.5)}
+.medal.n{background:#2b313a;border:2px dashed #59616d}
+@keyframes medal{from{transform:scale(0) rotate(-120deg);opacity:0}to{transform:none;opacity:1}}
+.center{text-align:center}
+/* ประกาศเลื่อนยศ */
+.toast{pointer-events:none;position:fixed;left:50%;top:18px;transform:translateX(-50%);z-index:50;background:#111;border:2px solid var(--pri);color:#fff;border-radius:14px;padding:12px 18px;box-shadow:0 10px 30px rgba(0,0,0,.6);text-align:center;animation:toast 3.2s ease-in-out forwards;max-width:92vw}
+.toast b{color:var(--pri);font-family:"Kanit",sans-serif;font-size:20px}
+@keyframes toast{0%{opacity:0;transform:translate(-50%,-30px)}10%,85%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-30px)}}
+/* กระดาษสี (confetti) */
+.cf{position:fixed;top:-12px;width:9px;height:14px;z-index:40;pointer-events:none;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg)}}
+/* หน้าสรุป */
+.sum{border:2px solid var(--pri);padding-top:0;overflow:hidden}
+.sum .hz{height:8px;background:var(--hazard);margin:0 -16px 12px}
+.sum .hd{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;border-bottom:1px dashed var(--line);padding-bottom:8px;margin-bottom:8px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:8px 0}
+.stats div{background:#15181d;border:1px solid #3b434f;border-radius:10px;padding:6px;text-align:center;font-size:12.5px;color:var(--muted)}
+.stats div b{display:block;font-size:21px;color:#fff;font-family:"Kanit",sans-serif;font-weight:600}
+.tbar{margin:3px 0}
+.tbar .lb{display:flex;justify-content:space-between;font-size:14px}
+.tbar .bar{height:9px;background:#0f1215;border-radius:8px;overflow:hidden;border:1px solid #333a44}
+.tbar .bar i{display:block;height:100%;transition:width 1s}
+.stamp{font-size:13px;color:var(--muted);text-align:center;margin-top:6px}
+.badge{display:inline-block;padding:6px 14px;border-radius:10px;font-weight:600;font-size:17px}
+.badge.ok{background:var(--ok);color:#06210f}.badge.bad{background:var(--bad);color:#2a0705}
+.mini-medals{font-size:22px;letter-spacing:2px}
+.small{font-size:14px}
+@media (max-width:520px){
+  body{font-size:16px}
+  .acts{grid-template-columns:1fr}
+  .stats div{font-size:11px;padding:4px} .stats div b{font-size:17px}
+  .grid2{grid-template-columns:1fr}
+  .steps div{font-size:10px}
+  header.top .t2{font-size:17px}
+  .logo{flex-basis:44px;height:44px;font-size:24px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top"><div class="hz"></div>
+    <div class="in"><div class="logo"><span>⚡</span></div><div>
+      <div class="t1">ง 30275 งานช่างพื้นฐานในชีวิตประจำวัน · ม.4 · แผนที่ 2</div>
+      <div class="t2">กฎความปลอดภัยและการตัดระบบฉุกเฉิน</div>
+      <div class="who" id="who"></div></div></div>
+    <div class="rankbar" id="rankbar" style="display:none"></div>
+  </header>
+  <div class="steps" id="steps"></div>
+  <main id="app"></main>
+</div>
+
+<script>
+/* =========================================================
+   ส่วนที่ 1: ข้อมูลเนื้อหา (ครูแก้ข้อความ/ข้อสอบได้ที่ส่วนนี้)
+   ========================================================= */
+
+// 4 ด้านที่ใช้วิเคราะห์ว่าเก่ง/อ่อนด้านใด
+const TOPICS = {
+  safety:{name:"กฎความปลอดภัยและอุปกรณ์ป้องกัน (PPE)", short:"กฎความปลอดภัย/PPE", tipS:"กฎ 3 ระยะ รองเท้าพื้นยาง แขวนป้าย เช็คไฟซ้ำ", color:"#7c4dcc",
+    tip:"ทบทวนกฎ 3 ระยะ (ก่อน–ขณะ–หลังปฏิบัติงาน) การสวมรองเท้าพื้นยาง แว่นตานิรภัย และการแขวนป้าย \"ห้ามสับสวิตช์ กำลังซ่อมบำรุง\""},
+  elec:{name:"ระบบไฟฟ้าและตู้ควบคุมไฟฟ้า", short:"ระบบไฟฟ้า/ตู้ไฟ", tipS:"หน้าที่เมนเบรกเกอร์ ปุ่ม T การรีเซ็ตเมื่อทริป", color:"#d99a00",
+    tip:"ทบทวนหน้าที่ของเมนเบรกเกอร์ เครื่องตัดไฟรั่ว (ปุ่ม T) และเบรกเกอร์ย่อย รวมถึงวิธีรีเซ็ตเมื่อเบรกเกอร์ทริป"},
+  water:{name:"ระบบประปาและวาล์วน้ำ", short:"ระบบประปา/วาล์ว", tipS:"บอลวาล์วขวาง 90° = ปิด, ขวาปิด–ซ้ายเปิด", color:"#2b8fd6",
+    tip:"ทบทวนบอลวาล์ว (ก้านขวางตั้งฉากท่อ = ปิด) เกทวาล์ว (ขวาปิด–ซ้ายเปิด) และการปิดวาล์วเฉพาะจุดก่อน"},
+  rescue:{name:"การช่วยผู้ถูกไฟดูดและเหตุฉุกเฉิน", short:"ช่วยผู้ถูกไฟดูด/ฉุกเฉิน", tipS:"คาถา 4 ขั้น ใช้ฉนวนแห้ง โทร 1669", color:"#c4372f",
+    tip:"ทบทวนคาถา \"ห้ามจับสด – ปลดคัตเอาต์ – เอาฉนวนเขี่ย – เคลียร์พื้นที่โทร 1669\" และห้ามใช้น้ำดับไฟจากไฟฟ้า"}
+};
+
+// แบบทดสอบก่อน–หลังเรียน 10 ข้อ (จากแผน) a = ลำดับคำตอบที่ถูก (เริ่มนับ 0), t = ด้านที่วัด
+const TEST = [
+ {t:"elec", q:"อุปกรณ์ใดในตู้ควบคุมไฟฟ้าหลักของบ้าน ที่ตัดวงจรอัตโนมัติทันทีเมื่อตรวจพบ \"กระแสไฟฟ้ารั่ว\" ลงดินหรือไหลผ่านร่างกายมนุษย์?",
+  ch:["สวิตช์ทางเดียว","เครื่องตัดไฟรั่ว (RCD / RCBO)","มาตรวัดหน่วยไฟฟ้าหน้าบ้าน","เต้ารับไฟฟ้าแบบมีกราวด์"], a:1,
+  why:"เครื่องตัดไฟรั่วเปรียบเทียบกระแสไหลเข้า–ออก ถ้ามีกระแสรั่วเกินพิกัด (เช่น 30 mA) จะตัดวงจรในเสี้ยววินาที"},
+ {t:"elec", q:"ต้องการทดสอบว่า \"เครื่องตัดไฟรั่ว\" ยังทำงานตัดไฟได้ตามปกติหรือไม่ ควรทำอย่างไรเป็นประจำทุกเดือน?",
+  ch:["นำสายไฟสองเส้นมาแตะกันให้เกิดประกายไฟที่เต้ารับ","เทน้ำใส่เครื่องใช้ไฟฟ้าเพื่อดูว่าเบรกเกอร์จะตัดหรือไม่","กดปุ่มทดสอบ (ปุ่ม T หรือ Test) แล้วสังเกตว่าคันโยกดีดลงมาที่ OFF ทันทีหรือไม่","ใช้ไขควงงัดฝาครอบเครื่องตัดไฟรั่วออกมาตรวจดูสปริงด้านใน"], a:2,
+  why:"ปุ่ม T จำลองไฟรั่วขนาดเล็กอย่างปลอดภัย ถ้ากดแล้วคันโยกดีดลงทันที แสดงว่ากลไกยังทำงานปกติ"},
+ {t:"safety", q:"หลังสับเบรกเกอร์ลงที่ OFF เพื่อซ่อมอุปกรณ์ไฟฟ้าแล้ว เหตุใดต้องแขวนป้าย \"ห้ามสับสวิตช์ กำลังซ่อมบำรุง\" ไว้หน้าตู้ควบคุมไฟฟ้าเสมอ?",
+  ch:["เพื่อความสวยงามและเป็นระเบียบของตู้ควบคุมไฟฟ้า","เพื่อป้องกันไม่ให้คนอื่นที่ไม่รู้ว่ากำลังซ่อม มาสับเบรกเกอร์จ่ายไฟซ้ำจนผู้ซ่อมถูกไฟดูด","เพื่อช่วยลดค่ากระแสไฟฟ้าระหว่างการซ่อมบำรุง","เพื่อป้องกันไม่ให้ฝุ่นละอองเข้าไปเกาะในตู้ควบคุมไฟฟ้า"], a:1,
+  why:"หลัก Lockout/Tagout: อุบัติเหตุร้ายแรงจำนวนมากเกิดจากคนในบ้านเห็นไฟดับแล้วไปสับเบรกเกอร์ขึ้นขณะมีคนซ่อม"},
+ {t:"water", q:"\"บอลวาล์ว\" ที่มีด้ามจับเป็นก้านโยกยาว จะ \"ปิดน้ำสนิท\" เมื่อก้านโยกอยู่ในลักษณะใด?",
+  ch:["ก้านโยกวางขนานแนวเดียวกับท่อประปา","ก้านโยกบิดทำมุมตั้งฉาก (90 องศา) ขวางแนวท่อ","ก้านโยกถูกถอดออกจากตัววาล์ว","ก้านโยกเอียง 45 องศากับแนวท่อตลอดเวลา"], a:1,
+  why:"ลูกบอลข้างในเจาะรูตรงกลาง ก้านขนานท่อ = รูตรงแนวท่อ (เปิด) ก้านขวาง 90° = ผนังลูกบอลกั้นน้ำ (ปิด)"},
+ {t:"water", q:"ท่อประปาในบ้านแตก ต้องการปิด \"วาล์วประตูน้ำ (Gate Valve)\" ที่มีหัวหมุนเป็นพวงมาลัยกลม ต้องหมุนทิศใด?",
+  ch:["หมุนตามเข็มนาฬิกา (หมุนขวา) จนสุด","หมุนทวนเข็มนาฬิกา (หมุนซ้าย) จนสุด","ดึงพวงมาลัยขึ้นด้านบนตรง ๆ โดยไม่ต้องหมุน","หมุนสลับซ้ายและขวาไปมาอย่างรวดเร็ว"], a:0,
+  why:"วาล์วมาตรฐานเป็นเกลียวขวา หมุนตามเข็มนาฬิกาลิ้นวาล์วจะเลื่อนลงปิด จำง่าย ๆ \"ขวาปิด – ซ้ายเปิด\""},
+ {t:"rescue", q:"พบคนถูกไฟฟ้าดูดหมดสติติดอยู่กับสายไฟชำรุดภายในบ้าน ลำดับการปฏิบัติข้อใดถูกต้องและปลอดภัยที่สุด?",
+  ch:["รีบใช้มือเปล่าจับดึงแขนผู้ประสบภัยออกให้เร็วที่สุดก่อนทำอย่างอื่น","สาดน้ำใส่จุดที่สายไฟช็อตเพื่อดับประกายไฟก่อนเข้าไปช่วย","ตั้งสติ ห้ามจับด้วยมือเปล่า รีบสับเมนเบรกเกอร์ ถ้าตัดไฟไม่ได้ใช้ฉนวนแห้งเขี่ยสายไฟหรือคล้องดึงออก แล้วโทร 1669","ใช้ท่อนเหล็กหรืออะลูมิเนียมเขี่ยสายไฟออกจากตัวผู้ประสบภัยทันที"], a:2,
+  why:"ร่างกายผู้ถูกไฟดูดเป็นตัวนำไฟฟ้า ถ้าจับด้วยมือเปล่าหรือโลหะจะถูกดูดไปด้วย ต้องตัดไฟก่อนหรือใช้ฉนวนแห้ง"},
+ {t:"safety", q:"ข้อใดเป็นการเลือกใช้อุปกรณ์ป้องกันส่วนบุคคล (PPE) ในงานช่างพื้นฐานที่เหมาะสมและปลอดภัยที่สุด?",
+  ch:["สวมรองเท้าแตะฟองน้ำเปียกน้ำขณะตรวจสอบตู้ควบคุมไฟฟ้า","สวมแว่นตานิรภัยเมื่อตัดท่อหรือเจาะผนัง และสวมรองเท้าหุ้มส้นพื้นยางที่แห้งเมื่อทำงานไฟฟ้า","สวมถุงมือผ้าที่เปียกชื้นขณะจับเครื่องใช้ไฟฟ้าที่มีไฟรั่ว","สวมสร้อยข้อมือโลหะยาวรุ่มร่ามขณะใช้เครื่องมือหมุนหรือตัดชิ้นงาน"], a:1,
+  why:"แว่นตานิรภัยกันเศษกระเด็นเข้าตา รองเท้าพื้นยางที่แห้งเป็นฉนวนกันไฟไหลผ่านเท้าลงดิน"},
+ {t:"elec", q:"\"เบรกเกอร์ย่อย\" ดีดตัดวงจร (Trip) ขณะเสียบเตารีดและหม้อหุงข้าวพร้อมกัน การแก้ไขที่ถูกต้องตามหลักความปลอดภัยคือข้อใด?",
+  ch:["ใช้เทปกาวพันยึดคันโยกเบรกเกอร์ไว้ไม่ให้ดีดลงมาได้อีก","รีบดันคันโยกขึ้นทันทีโดยไม่ต้องถอดปลั๊กเครื่องใช้ไฟฟ้าใด ๆ","ถอดปลั๊กเครื่องใช้ไฟฟ้าที่ใช้งานหนักหรือสงสัยว่าชำรุดก่อน ตรวจว่าไม่มีกลิ่นไหม้ แล้วสับเบรกเกอร์ลงสุดที่ OFF จากนั้นดันขึ้น ON","เปลี่ยนเอาสายทองแดงเส้นใหญ่มาต่อตรงแทนเบรกเกอร์ตัวเดิม"], a:2,
+  why:"เบรกเกอร์ทริปเพราะใช้ไฟเกินพิกัดหรือลัดวงจร ต้องปลดโหลดและหาสาเหตุก่อนรีเซ็ต ห้ามฝืนหรือดัดแปลงเบรกเกอร์"},
+ {t:"safety", q:"ข้อใดเป็นพฤติกรรมที่ฝ่าฝืนกฎความปลอดภัยในงานช่างไฟฟ้าและประปาอย่างร้ายแรง?",
+  ch:["เช็ดมือและพื้นบริเวณทำงานให้แห้งก่อนตรวจสอบอุปกรณ์ไฟฟ้า","ปิดวาล์วน้ำประธานทุกครั้งก่อนถอดเปลี่ยนก๊อกน้ำที่ชำรุด","ตรวจสอบสายไฟขณะมือเปียกน้ำและยืนเท้าเปล่าบนพื้นปูนที่ชื้นแฉะ","จัดเก็บเครื่องมือเข้ากล่องหลังใช้งานและเช็ดคราบน้ำบนพื้นทันที"], a:2,
+  why:"น้ำทำให้ความต้านทานของผิวหนังลดลงมาก ไฟรั่วเพียงเล็กน้อยก็ไหลผ่านร่างกายลงพื้นชื้นได้รุนแรง"},
+ {t:"rescue", q:"เกิดไฟไหม้ที่เต้ารับเพราะไฟฟ้าลัดวงจร เหตุใดจึงห้ามใช้น้ำสาดดับไฟในขณะที่ยังไม่ได้ตัดเมนเบรกเกอร์?",
+  ch:["เพราะน้ำจะทำให้สีทาผนังบ้านหลุดลอกเสียหาย","เพราะน้ำประปาเป็นตัวนำไฟฟ้า กระแสไฟจะไหลตามสายน้ำมาดูดผู้สาดน้ำ","เพราะน้ำจะทำให้มิเตอร์ไฟฟ้าหมุนเร็วขึ้นกว่าเดิม","เพราะน้ำจะทำให้ท่อพีวีซีละลายเร็วขึ้น"], a:1,
+  why:"ไฟจากระบบไฟฟ้า (ประเภท C) ห้ามใช้น้ำ ต้องตัดเมนเบรกเกอร์ก่อน หรือใช้ถังดับเพลิงผงเคมีแห้ง/CO₂"}
+];
+const PASS = 8; // เกณฑ์ผ่านหลังเรียน ร้อยละ 80 = 8 จาก 10 ข้อ
+
+/* ---------- ภาพประกอบ (SVG) ---------- */
+// ตู้ควบคุมไฟฟ้า: s = {main:'on'|'off', rcd:'on'|'off', mcb:['on','trip','off'...], sign:bool, hl:'main'|'rcd'|'mcb'|null}
+function panelSVG(s){
+  s = Object.assign({main:'on',rcd:'on',mcb:['on','on','on'],sign:false,hl:null,tester:false},s||{});
+  const lever=(x,y,state,w)=>{ // คันโยก: on=บน off=ล่าง trip=กลาง
+    const yy = state==='on'? y+6 : state==='trip'? y+22 : y+38;
+    const col = state==='on'? '#1e8a4c' : state==='trip'? '#e0a100' : '#c4372f';
+    return `<rect x="${x}" y="${y}" width="${w}" height="56" rx="4" fill="#e9edf3" stroke="#b9c1cd"/>
+            <rect x="${x+w/2-9}" y="${yy}" width="18" height="14" rx="3" fill="${col}"/>
+            <text x="${x+w/2}" y="${y+72}" font-size="11" text-anchor="middle" fill="${col}" font-weight="700">${state==='on'?'ON':state==='trip'?'TRIP':'OFF'}</text>`;
+  };
+  const box=(x,y,w,h,id)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="6" fill="#fff" stroke="${s.hl===id?'#1f5fbf':'#9aa4b2'}" stroke-width="${s.hl===id?4:1.5}"/>`;
+  let mcbs='';
+  s.mcb.forEach((m,i)=>{const x=228+i*52; mcbs+=box(x,60,44,108,'mcb')+lever(x+8,74,m,28)+`<text x="${x+22}" y="70" font-size="10" text-anchor="middle">MCB${i+1}</text>`;});
+  return `<svg viewBox="0 0 400 230" role="img" aria-label="ตู้ควบคุมไฟฟ้า">
+  <rect x="8" y="22" width="384" height="170" rx="12" fill="#cfd6e0" stroke="#7d8796" stroke-width="2"/>
+  <text x="200" y="16" font-size="13" text-anchor="middle" font-weight="700">ตู้ควบคุมไฟฟ้า (Consumer Unit)</text>
+  ${box(22,40,86,140,'main')}${lever(44,62,s.main,42)}
+  <text x="65" y="56" font-size="11" text-anchor="middle" font-weight="700">เมนเบรกเกอร์</text>
+  <text x="65" y="164" font-size="10" text-anchor="middle">ตัดไฟทั้งบ้าน</text>
+  ${box(118,40,100,140,'rcd')}${lever(146,62,s.rcd,44)}
+  <text x="168" y="56" font-size="11" text-anchor="middle" font-weight="700">เครื่องตัดไฟรั่ว</text>
+  <circle cx="168" cy="160" r="11" fill="#f5c400" stroke="#8a6d00"/><text x="168" y="164" font-size="11" text-anchor="middle" font-weight="700">T</text>
+  ${mcbs}
+  <text x="306" y="182" font-size="10" text-anchor="middle">เบรกเกอร์ย่อย (แยกแต่ละวงจร)</text>
+  ${s.sign?`<g><line x1="65" y1="182" x2="65" y2="196" stroke="#333"/><rect x="10" y="194" width="200" height="32" rx="4" fill="#c4372f"/>
+     <text x="110" y="208" font-size="11" fill="#fff" text-anchor="middle" font-weight="700">อันตราย! ห้ามสับสวิตช์</text>
+     <text x="110" y="221" font-size="10" fill="#fff" text-anchor="middle">กำลังซ่อมบำรุง</text></g>`:''}
+  ${s.tester?`<g><rect x="300" y="198" width="80" height="12" rx="3" fill="#1f5fbf"/><polygon points="380,200 396,204 380,208" fill="#888"/>
+     <text x="300" y="226" font-size="10">ไขควงเช็คไฟ: ไม่ติด ✓</text></g>`:''}
+  </svg>`;
+}
+// บอลวาล์ว: open=true ก้านขนานท่อ
+function ballSVG(open,label){
+  return `<svg viewBox="0 0 260 120" role="img" aria-label="บอลวาล์ว">
+   <rect x="0" y="62" width="260" height="22" fill="${open?'#9fd0f2':'#cfd6e0'}" stroke="#7d8796"/>
+   <circle cx="130" cy="73" r="24" fill="#d8b04c" stroke="#8a6d00" stroke-width="2"/>
+   <g transform="rotate(${open?0:90} 130 50)"><rect x="128" y="45" width="78" height="10" rx="5" fill="#c4372f"/><circle cx="130" cy="50" r="7" fill="#555"/></g>
+   ${open?'<text x="22" y="104" font-size="12" fill="#1f5fbf">→ น้ำไหล</text>':'<text x="22" y="104" font-size="12" fill="#c4372f">✕ น้ำหยุด</text>'}
+   <text x="130" y="116" font-size="12" text-anchor="middle" font-weight="700">${label||('บอลวาล์ว: '+(open?'เปิด (ก้านขนานท่อ)':'ปิด (ก้านขวาง 90°)'))}</text>
+  </svg>`;
+}
+// เกทวาล์ว: turns 0..3 (3 = ปิดสนิท)
+function gateSVG(turns,label){
+  const gy = 58 + turns*8; const closed = turns>=3;
+  return `<svg viewBox="0 0 260 130" role="img" aria-label="เกทวาล์ว">
+   <rect x="0" y="80" width="260" height="22" fill="${closed?'#cfd6e0':'#9fd0f2'}" stroke="#7d8796"/>
+   <rect x="110" y="64" width="40" height="52" rx="6" fill="#b08d57" stroke="#6b5531"/>
+   <rect x="124" y="${gy}" width="12" height="30" fill="#6b5531"/>
+   <line x1="130" y1="64" x2="130" y2="26" stroke="#555" stroke-width="4"/>
+   <g transform="rotate(${turns*120} 130 22)"><ellipse cx="130" cy="22" rx="34" ry="9" fill="none" stroke="#c4372f" stroke-width="5"/><line x1="96" y1="22" x2="164" y2="22" stroke="#c4372f" stroke-width="3"/></g>
+   <text x="130" y="126" font-size="12" text-anchor="middle" font-weight="700">${label||('เกทวาล์ว: '+(closed?'ปิดสนิท':'เปิดอยู่')+' (หมุนแล้ว '+turns+'/3 รอบ)')}</text>
+  </svg>`;
+}
+
+/* ---------- บทเรียน 4 ตอน: แต่ละตอนมีหน้าเนื้อหา + คำถามเช็กความเข้าใจ ---------- */
+const LESSON = [
+ {title:"ตอนที่ 1 กฎความปลอดภัย 3 ระยะ และอุปกรณ์ป้องกันส่วนบุคคล", topic:"safety",
+  pages:[
+   ()=>`<p>อุบัติเหตุในงานช่าง <b>ไม่ได้เกิดจากความบังเอิญ</b> แต่เกิดจาก 2 อย่างรวมกัน</p>
+     <div class="grid2"><div class="fb bad">⚠️ <b>สภาพการณ์ที่ไม่ปลอดภัย</b><br>เช่น พื้นเปียก สายไฟชำรุด</div>
+     <div class="fb bad">🙅 <b>การกระทำที่ไม่ปลอดภัย</b><br>เช่น มือเปียกจับสายไฟ ไม่สวมรองเท้า</div></div>
+     <p>จึงต้องทำตามกฎความปลอดภัย <b>3 ระยะ</b>: ก่อน – ขณะ – หลังปฏิบัติงาน</p>`,
+   ()=>`<h3>ระยะที่ 1 ก่อนเริ่มปฏิบัติงาน (เตรียมการ)</h3>
+     <ul class="tight"><li>แต่งกายรัดกุม <b>ไม่สวมเครื่องประดับโลหะ</b></li>
+     <li>👞 <b>รองเท้าหุ้มส้นพื้นยางที่แห้ง</b> — เป็นฉนวนกันไฟไหลผ่านเท้าลงดิน</li>
+     <li>👓 <b>แว่นตานิรภัย</b> — เมื่อตัดท่อ สกัด หรือเจาะผนัง</li>
+     <li>🧤 <b>ถุงมือช่าง</b> — เลือกให้เหมาะกับงาน</li>
+     <li>ตัดแหล่งพลังงานก่อนซ่อม: งานประปา → <b>ปิดวาล์วน้ำ</b> / งานไฟฟ้า → <b>สับเบรกเกอร์ OFF + แขวนป้าย</b></li></ul>`,
+   ()=>`<h3>ระยะที่ 2 ขณะปฏิบัติงาน (ลงมือทำ)</h3>
+     <ul class="tight"><li>❌ ห้ามทำงานไฟฟ้าขณะ <b>ตัวเปียก</b> หรือ <b>ยืนบนพื้นเปียก</b></li>
+     <li>🪛 ใช้ <b>ไขควงเช็คไฟ/มัลติมิเตอร์ ตรวจซ้ำ</b> ว่าไม่มีไฟจริงก่อนสัมผัส</li>
+     <li>มีสติ ไม่เล่นหยอกล้อด้วยเครื่องมือ</li>
+     <li>เจอปัญหา <b>เกินความสามารถ</b> (เช่น เมนเบรกเกอร์ละลาย สายเมนขาด) → <b>หยุด แล้วแจ้งช่างผู้เชี่ยวชาญ</b></li></ul>
+     <h3>ระยะที่ 3 หลังปฏิบัติงาน (จัดเก็บและตรวจสอบ)</h3>
+     <ul class="tight"><li>ตรวจจุดต่อ ไม่มีน้ำรั่ว ไม่มีเศษสายไฟเปลือย</li>
+     <li>เช็ดเครื่องมือ จัดเก็บเข้าที่ <b>เช็ดพื้นให้แห้งก่อน</b> เปิดน้ำ/ไฟคืน</li></ul>`
+  ],
+  checks:[
+   {q:"นักเรียนกำลังจะเจาะผนังเพื่อยึดท่อ ควรสวมอุปกรณ์ป้องกันใดเพื่อป้องกันดวงตา?",ch:["แว่นกันแดด","แว่นตานิรภัย","หน้ากากผ้า","ไม่ต้องสวม ถ้าระวังดี"],a:1,
+    why:"แว่นตานิรภัยกันเศษปูน เศษพลาสติก หรือเศษโลหะกระเด็นเข้าตา"},
+   {q:"ขณะซ่อมพบว่า \"เมนเบรกเกอร์ไหม้ละลาย\" นักเรียนควรทำอย่างไร?",ch:["ถอดออกแล้วต่อสายตรงแทน","ใช้เทปพันแล้วใช้ต่อ","หยุดทำ แล้วแจ้งช่างผู้เชี่ยวชาญ","สับขึ้นลงหลาย ๆ ครั้งให้ใช้ได้"],a:2,
+    why:"ต้องรู้ขีดจำกัดของตนเอง งานที่เกินความสามารถต้องส่งต่อให้ช่างผู้เชี่ยวชาญ"},
+   {q:"ซ่อมก๊อกน้ำเสร็จแล้ว ก่อนเปิดน้ำและไฟคืน ควรทำสิ่งใดก่อน?",ch:["เปิดน้ำและไฟทันที","เช็ดพื้นให้แห้ง เก็บเครื่องมือ และตรวจจุดต่อว่าไม่รั่ว","ปล่อยเครื่องมือไว้ที่เดิมเพื่อใช้ครั้งหน้า","ไม่ต้องตรวจ เพราะซ่อมเสร็จแล้ว"],a:1,
+    why:"หลังปฏิบัติงานต้องตรวจจุดต่อ จัดเก็บเครื่องมือ และเช็ดพื้นให้แห้งก่อนคืนระบบ"}
+  ]},
+ {title:"ตอนที่ 2 ตู้ควบคุมไฟฟ้าและการตัดไฟฉุกเฉิน", topic:"elec",
+  pages:[
+   ()=>`<p>ตู้ควบคุมไฟฟ้าในบ้านมีอุปกรณ์หลัก 3 ส่วน <b>แตะที่ปุ่มด้านล่าง</b>เพื่อดูหน้าที่ของแต่ละตัว</p>
+     <div class="scene" id="pPanel">${panelSVG({})}</div>
+     <div class="row"><button class="btn ghost" data-pp="main">เมนเบรกเกอร์</button><button class="btn ghost" data-pp="rcd">เครื่องตัดไฟรั่ว</button><button class="btn ghost" data-pp="mcb">เบรกเกอร์ย่อย</button></div>
+     <div id="ppInfo" class="fb info">เลือกอุปกรณ์เพื่อดูคำอธิบาย</div>`,
+   ()=>`<p><b>ทดลองกดปุ่ม T</b> ของเครื่องตัดไฟรั่ว ถ้าคันโยกดีดลง OFF ทันที = เครื่องยังทำงานปกติ (ควรทดสอบ <b>เดือนละ 1 ครั้ง</b>)</p>
+     <div class="scene" id="tPanel">${panelSVG({})}</div>
+     <div class="row"><button class="btn" id="btnT">🟡 กดปุ่ม T</button><button class="btn ghost" id="btnTreset">ดันคันโยกกลับ ON</button></div>
+     <div id="tInfo" class="fb info">ลองกดดู</div>`,
+   ()=>`<h3>ขั้นตอนตัดไฟเพื่อซ่อมบำรุง</h3>
+     <ol class="tight"><li>ดูพื้นหน้าตู้ ถ้าเปียก <b>ห้ามเดินเท้าเปล่า</b> สวมรองเท้าพื้นยางแห้ง หรือยืนบนแผ่นฉนวนแห้ง</li>
+     <li>ใช้ <b>มือแห้งข้างเดียว</b> (หันข้างเข้าหาตู้) ผลักคันโยก <b>เมนเบรกเกอร์ลง OFF จนสุด</b></li>
+     <li><b>แขวนป้าย</b> "อันตราย! ห้ามสับสวิตช์ กำลังซ่อมบำรุง"</li>
+     <li>ใช้ไขควงเช็คไฟ <b>ตรวจซ้ำ</b> ที่จุดซ่อม</li></ol>
+     <div class="key">🔁 <b>ถ้าเบรกเกอร์ทริป (คันโยกค้างตรงกลาง)</b>: ห้ามดันขึ้นทันที → ถอดปลั๊กเครื่องใช้ไฟฟ้าต้นเหตุ → ดึงคันโยกลง OFF ให้สุด (รีเซ็ตสปริง) → ดันขึ้น ON</div>
+     <div class="scene" id="tripPanel">${panelSVG({mcb:['on','trip','on']})}</div>
+     <div class="row"><button class="btn ghost" id="trip1">1) ถอดปลั๊ก</button><button class="btn ghost" id="trip2">2) ดึงลง OFF</button><button class="btn ghost" id="trip3">3) ดันขึ้น ON</button></div>
+     <div id="tripInfo" class="fb info">ลองรีเซ็ต MCB2 ตามลำดับ</div>`
+  ],
+  checks:[
+   {q:"ต้องการตัดไฟ \"ทั้งบ้าน\" ในครั้งเดียว ต้องสับอุปกรณ์ใด?",ch:["เบรกเกอร์ย่อยตัวใดก็ได้","เมนเบรกเกอร์","ปุ่ม T","ถอดหลอดไฟ"],a:1,
+    why:"เมนเบรกเกอร์ควบคุมการเปิด–ปิดไฟฟ้าทั้งหมดของบ้าน"},
+   {q:"ควรกดปุ่ม T ทดสอบเครื่องตัดไฟรั่วบ่อยแค่ไหน?",ch:["วันละ 1 ครั้ง","เดือนละ 1 ครั้ง","ปีละ 1 ครั้ง","ไม่ต้องกดเลย"],a:1,
+    why:"ใบความรู้แนะนำให้ฝึกกดปุ่ม T ทดสอบเดือนละ 1 ครั้ง"},
+   {q:"เมื่อสับเมนเบรกเกอร์ ควรใช้มืออย่างไร?",ch:["สองมือจับให้แน่น","มือแห้งข้างเดียว หันข้างเข้าหาตู้","มือที่เปียกก็ได้ถ้ารีบ","ใช้ไม้เหล็กดันแทนมือ"],a:1,
+    why:"ใช้มือแห้งข้างเดียว และหันข้างเข้าหาตู้เพื่อลดแรงปะทะหากเกิดประกายไฟ"}
+  ]},
+ {title:"ตอนที่ 3 วาล์วน้ำและการตัดระบบประปาฉุกเฉิน", topic:"water",
+  pages:[
+   ()=>`<p>เมื่อก๊อกหัก สายฉีดชำระระเบิด หรือท่อแตก ต้องตัดน้ำที่วาล์ว ซึ่งมี 2 ชนิดหลัก</p>
+     <h3>1) บอลวาล์ว (Ball Valve) — ด้ามเป็น <u>ก้านโยกยาว</u></h3>
+     <p class="muted">มักเป็นวาล์วประธานหลังมิเตอร์น้ำ หรือวาล์วคุมท่อแยก</p>
+     <div class="scene" id="bv">${ballSVG(true)}</div>
+     <div class="row"><button class="btn" id="bvBtn">บิดก้านโยก 90°</button></div>
+     <div class="key">ก้าน <b>ขนาน</b>ท่อ = <b>เปิด</b> · ก้าน <b>ขวางตั้งฉาก</b>ท่อ = <b>ปิดสนิท</b></div>`,
+   ()=>`<h3>2) วาล์วประตูน้ำ (Gate Valve) / สต็อปวาล์ว — หัวหมุน <u>พวงมาลัยกลม</u></h3>
+     <p class="muted">พบเป็นวาล์วประธานรุ่นมาตรฐาน หรือวาล์วเฉพาะจุดใต้อ่างล้างหน้า/ข้างโถสุขภัณฑ์</p>
+     <div class="scene" id="gv">${gateSVG(0)}</div>
+     <div class="row"><button class="btn" id="gvCW">↻ หมุนตามเข็มนาฬิกา</button><button class="btn ghost" id="gvCCW">↺ หมุนทวนเข็มนาฬิกา</button></div>
+     <div id="gvInfo" class="fb info">ลองหมุนดูว่าทิศไหนปิดน้ำ</div>
+     <div class="key">จำง่าย ๆ: <b>ขวาปิด – ซ้ายเปิด</b> (หมุนตามเข็มหลายรอบจนสุดเกลียว)</div>`,
+   ()=>`<h3>ปิดวาล์วไหนก่อน?</h3>
+     <p>ถ้าน้ำรั่วเฉพาะจุด (เช่น สายฉีดชำระแตก) ให้ปิด <b>วาล์วเฉพาะจุด (สต็อปวาล์ว)</b> ก่อน ห้องอื่นในบ้านจะยังใช้น้ำได้</p>
+     <p>ถ้ารั่วที่ท่อก่อนถึงวาล์วเฉพาะจุด หรือหาจุดรั่วไม่เจอ ให้ไปปิด <b>วาล์วประธานหลังมิเตอร์น้ำ</b></p>
+     <div class="key">🏠 การบ้าน: สำรวจว่าที่บ้านของนักเรียน ตู้ควบคุมไฟฟ้าและวาล์วน้ำประธานอยู่ตรงไหน</div>`
+  ],
+  checks:[
+   {q:"บอลวาล์วที่ \"ก้านโยกวางขนานกับท่อ\" อยู่ในสถานะใด?",ch:["ปิดสนิท","เปิด น้ำไหลได้","ชำรุด","เปิดครึ่งเดียว"],a:1,
+    why:"ก้านขนานท่อ รูของลูกบอลตรงแนวท่อ น้ำจึงไหลผ่านได้"},
+   {q:"สายฉีดชำระในห้องน้ำแตก น้ำพุ่งแรง ควรปิดวาล์วจุดใดก่อน?",ch:["วาล์วประธานหน้าบ้าน","สต็อปวาล์วข้างโถสุขภัณฑ์","ก๊อกในห้องครัว","ไม่ต้องปิด รอช่าง"],a:1,
+    why:"ปิดวาล์วเฉพาะจุดก่อน ห้องอื่นในบ้านจะยังใช้น้ำได้ตามปกติ"},
+   {q:"ข้อใดจำทิศการหมุนเกทวาล์ว/สต็อปวาล์วได้ถูกต้อง?",ch:["ซ้ายปิด – ขวาเปิด","ขวาปิด – ซ้ายเปิด","ดึงขึ้นปิด – กดลงเปิด","หมุนทางไหนก็ปิดได้"],a:1,
+    why:"เกลียวขวามาตรฐาน: หมุนตามเข็ม (ขวา) = ปิด, ทวนเข็ม (ซ้าย) = เปิด"}
+  ]},
+ {title:"ตอนที่ 4 การช่วยเหลือผู้ถูกไฟฟ้าดูดอย่างปลอดภัย", topic:"rescue",
+  pages:[
+   ()=>`<div class="key" style="font-size:19px;text-align:center"><b>คาถา 4 ขั้นตอน</b><br>"ห้ามจับสด – ปลดคัตเอาต์ – เอาฉนวนเขี่ย – เคลียร์พื้นที่โทร 1669"</div>
+     <ol class="tight">
+      <li><b>ห้ามจับสด</b>: ห้ามใช้มือเปล่าจับตัวผู้ถูกไฟดูด สังเกตว่ามีน้ำขังหรือไม่</li>
+      <li><b>ปลดคัตเอาต์</b>: รีบสับเมนเบรกเกอร์เป็น OFF หรือดึงปลั๊กต้นเหตุโดยจับที่ตัวเต้าเสียบพลาสติกแห้ง</li>
+      <li><b>เอาฉนวนเขี่ย</b> (ถ้าตัดไฟไม่ได้ทันที): ยืนบนพื้นแห้ง ใช้ <b>ท่อ PVC แห้ง ไม้กวาดด้ามไม้แห้ง</b> เขี่ยสายไฟออก หรือใช้ <b>ผ้าขาวม้าแห้ง/เชือกแห้ง</b> คล้องดึงออก</li>
+      <li><b>เคลียร์พื้นที่โทร 1669</b>: ตรวจการหายใจ โทร <b>1669</b> (การแพทย์ฉุกเฉิน) ถ้าสายไฟสาธารณะขาด แจ้งการไฟฟ้าส่วนภูมิภาค <b>1129</b></li></ol>`,
+   ()=>`<h3>วัสดุไหนใช้ได้ / ห้ามใช้</h3>
+     <div class="grid2"><div class="fb ok">✅ <b>ใช้ได้ (ฉนวนแห้ง)</b><br>ท่อ PVC แห้ง · ไม้แห้ง · ไม้กวาดด้ามไม้แห้ง · ผ้าขาวม้าแห้ง · เชือกแห้ง</div>
+     <div class="fb bad">❌ <b>ห้ามใช้ (นำไฟฟ้า)</b><br>มือเปล่า · ท่อเหล็ก/อะลูมิเนียม · ของเปียก · สาดน้ำ</div></div>
+     <div class="key">🔥 ไฟไหม้จากไฟฟ้าลัดวงจร <b>ห้ามใช้น้ำดับ</b> ต้องตัดเมนเบรกเกอร์ก่อน หรือใช้ถังดับเพลิงผงเคมีแห้ง/CO₂</div>`
+  ],
+  order:{q:"เรียงคาถา 4 ขั้นตอนให้ถูกลำดับ (แตะทีละการ์ด)",items:["ห้ามจับสด","ปลดคัตเอาต์","เอาฉนวนเขี่ย","เคลียร์พื้นที่โทร 1669"]},
+  checks:[
+   {q:"วัสดุใดเหมาะที่สุดสำหรับเขี่ยสายไฟออกจากตัวผู้ถูกไฟดูด?",ch:["ท่ออะลูมิเนียม","ไม้กวาดด้ามไม้ที่แห้งสนิท","ผ้าเปียกน้ำ","ช้อนส้อมโลหะ"],a:1,
+    why:"ต้องใช้วัสดุที่เป็นฉนวนและแห้งสนิท"},
+   {q:"พบสายไฟฟ้าสาธารณะขาดตกลงบนถนน ควรแจ้งหมายเลขใด?",ch:["1669","1129 (การไฟฟ้าส่วนภูมิภาค)","1155","1112"],a:1,
+    why:"สายไฟสาธารณะขาดแจ้งการไฟฟ้าส่วนภูมิภาค 1129 ส่วนผู้บาดเจ็บโทร 1669"}
+  ]}
+];
+
+/* ---------- แบบจำลอง 3 ภารกิจ (ตามใบงาน 2.2) ----------
+   steps = ขั้นที่ถูก (need = ต้องทำขั้นใดก่อน), traps = การกระทำที่ผิด พร้อมคำอธิบาย */
+const MISSIONS = [
+ {title:"ภารกิจที่ 1 ตัดไฟเพื่อซ่อมบำรุง",
+  story:"เครื่องทำน้ำอุ่นในห้องน้ำมีไฟรั่ว พื้นหน้าตู้ไฟมีน้ำหยดเล็กน้อย นักเรียนต้องตัดไฟเพื่อให้ช่างเข้าซ่อมอย่างปลอดภัย",
+  goal:"ทำตามลำดับให้ถูกต้อง ภายใน 30 วินาที",
+  steps:[
+   {id:"shoe",label:"👞 สวมรองเท้าหุ้มส้นพื้นยาง ยืนในจุดแห้ง",topic:"safety",done:"สวมรองเท้าพื้นยาง ยืนจุดแห้งแล้ว"},
+   {id:"t",label:"🟡 กดปุ่ม T ที่เครื่องตัดไฟรั่ว",topic:"elec",need:["shoe"],done:"กดปุ่ม T แล้ว เครื่องตัดไฟรั่วทำงานปกติ"},
+   {id:"main",label:"⬇️ ใช้มือแห้งข้างเดียว สับเมนเบรกเกอร์ลง OFF",topic:"elec",need:["t"],done:"เมนเบรกเกอร์อยู่ที่ OFF"},
+   {id:"sign",label:"🪧 แขวนป้าย \"ห้ามสับสวิตช์ กำลังซ่อมบำรุง\"",topic:"safety",need:["main"],done:"แขวนป้ายเตือนแล้ว"},
+   {id:"test",label:"🪛 ใช้ไขควงเช็คไฟวัดซ้ำที่จุดซ่อม",topic:"safety",need:["sign"],done:"ตรวจซ้ำแล้ว ไม่มีไฟ ✓"}
+  ],
+  traps:[
+   {label:"🩴 ใส่รองเท้าแตะฟองน้ำ เดินเข้าไปเลย",topic:"safety",why:"รองเท้าแตะฟองน้ำที่เปียกไม่ใช่ฉนวน ต้องสวมรองเท้าหุ้มส้นพื้นยางที่แห้ง"},
+   {label:"✋ ใช้สองมือดันคันโยกให้แน่น",topic:"elec",why:"ให้ใช้มือแห้งเพียงข้างเดียว และหันข้างเข้าหาตู้ ลดอันตรายหากเกิดประกายไฟ"},
+   {label:"🔧 จับสายไฟที่จุดซ่อมได้เลย (สับเบรกเกอร์แล้ว)",topic:"safety",why:"ต้องใช้ไขควงเช็คไฟตรวจซ้ำก่อนสัมผัสทุกครั้ง เพราะอาจสับผิดตัวหรือยังมีไฟค้าง"}
+  ],
+  scene:(d)=>panelSVG({main:d.main?'off':'on',rcd:d.t?'off':'on',sign:!!d.sign,tester:!!d.test,mcb:['on','on','on']})
+     +`<p class="muted" style="text-align:center;margin:2px 0">${d.shoe?'👞 สวมรองเท้าพื้นยาง ยืนจุดแห้ง':'💧 พื้นหน้าตู้มีน้ำหยด ผู้ปฏิบัติยังเท้าเปล่า'}</p>`},
+ {title:"ภารกิจที่ 2 ท่อประปาใต้อ่างล้างหน้าแตก",
+  story:"น้ำพุ่งจากท่อใต้อ่างล้างหน้า และมีน้ำรั่วจากข้อต่อท่อช่วงก่อนถึงวาล์วใต้อ่างด้วย ชุดฝึกมีวาล์วประธาน 2 แบบ (บอลวาล์วและเกทวาล์ว) ให้ฝึกปิดทั้งสองตัว",
+  goal:"ปิดวาล์วเฉพาะจุดก่อน แล้วปิดวาล์วประธานทั้ง 2 แบบให้ถูกทิศ ภายใน 30 วินาที",
+  steps:[
+   {id:"stop",label:"↻ หมุนสต็อปวาล์วใต้อ่าง ตามเข็มนาฬิกาจนสุด",topic:"water",done:"ปิดสต็อปวาล์วใต้อ่างแล้ว (แต่ข้อต่อก่อนวาล์วยังรั่ว!)"},
+   {id:"ball",label:"↪️ บิดก้านบอลวาล์ว 90° ให้ขวางตั้งฉากท่อ",topic:"water",need:["stop"],done:"บอลวาล์วปิดแล้ว"},
+   {id:"gate",label:"↻ หมุนพวงมาลัยเกทวาล์ว ตามเข็มนาฬิกาจนสุด",topic:"water",need:["stop"],done:"เกทวาล์วปิดสนิทแล้ว"}
+  ],
+  traps:[
+   {label:"↺ หมุนสต็อปวาล์วใต้อ่าง ทวนเข็มนาฬิกา",topic:"water",why:"ทวนเข็มนาฬิกา = เปิด น้ำจะพุ่งแรงขึ้น จำไว้ \"ขวาปิด – ซ้ายเปิด\""},
+   {label:"↗️ บิดก้านบอลวาล์วให้ขนานกับท่อ",topic:"water",why:"ก้านขนานท่อ = เปิด ต้องบิดให้ขวางตั้งฉาก 90°"},
+   {label:"↺ หมุนพวงมาลัยเกทวาล์ว ทวนเข็มนาฬิกา",topic:"water",why:"ทวนเข็มนาฬิกาเป็นการยกลิ้นวาล์วขึ้น (เปิด) ต้องหมุนตามเข็ม"},
+   {label:"🪣 เอาถังรองน้ำ แล้วรอให้น้ำหยุดเอง",topic:"water",why:"น้ำจะไม่หยุดเอง ต้องตัดระบบที่วาล์วทันที"}
+  ],
+  scene:(d)=>{
+    const leakA=!d.stop, leakB=!(d.ball||d.gate);
+    return `<svg viewBox="0 0 400 170" role="img" aria-label="ระบบท่อประปา">
+     <rect x="6" y="40" width="44" height="40" rx="4" fill="#dfe6ee" stroke="#7d8796"/><text x="28" y="64" font-size="10" text-anchor="middle">มิเตอร์</text>
+     <rect x="50" y="54" width="300" height="12" fill="${leakB?'#9fd0f2':'#cfd6e0'}" stroke="#7d8796"/>
+     <rect x="338" y="54" width="12" height="70" fill="${leakB?'#9fd0f2':'#cfd6e0'}" stroke="#7d8796"/>
+     <circle cx="100" cy="60" r="12" fill="#d8b04c" stroke="#8a6d00"/>
+     <g transform="rotate(${d.ball?90:0} 100 44)"><rect x="98" y="40" width="44" height="8" rx="4" fill="#c4372f"/></g>
+     <text x="100" y="92" font-size="10" text-anchor="middle">บอลวาล์ว ${d.ball?'(ปิด)':'(เปิด)'}</text>
+     <rect x="180" y="48" width="22" height="24" rx="3" fill="#b08d57"/><line x1="191" y1="48" x2="191" y2="30" stroke="#555" stroke-width="3"/>
+     <ellipse cx="191" cy="28" rx="18" ry="5" fill="none" stroke="#c4372f" stroke-width="4"/>
+     <text x="191" y="92" font-size="10" text-anchor="middle">เกทวาล์ว ${d.gate?'(ปิด)':'(เปิด)'}</text>
+     <text x="270" y="48" font-size="10" text-anchor="middle">ข้อต่อรั่ว</text>
+     ${leakB?'<path class="spray" d="M270 66 q-6 18 -14 30 M270 66 q6 18 14 30 M270 66 l0 34" stroke="#2b8fd6" stroke-width="3" fill="none"/>':'<text x="250" y="82" font-size="11" text-anchor="middle" fill="#1e8a4c">✓ หยุดรั่ว</text>'}
+     <rect x="300" y="124" width="90" height="16" rx="6" fill="#eef1f6" stroke="#7d8796"/><text x="345" y="160" font-size="10" text-anchor="middle">อ่างล้างหน้า</text>
+     <circle cx="344" cy="108" r="9" fill="#fff" stroke="${d.stop?'#1e8a4c':'#c4372f'}" stroke-width="3"/>
+     <text x="300" y="104" font-size="10" text-anchor="end">สต็อปวาล์ว ${d.stop?'(ปิด)':'(เปิด)'}</text>
+     ${leakA&&leakB?'<path class="spray" d="M344 124 q-14 14 -26 20 M344 124 q14 14 26 20" stroke="#2b8fd6" stroke-width="3" fill="none"/>':''}
+    </svg>`;}},
+ {title:"ภารกิจที่ 3 ช่วยเหลือผู้ถูกไฟฟ้าดูด",
+  story:"เพื่อนบ้านใช้เครื่องฉีดน้ำแรงดันสูงด้วยเท้าเปล่า สายไฟถลอกแตะแอ่งน้ำ เขาถูกไฟดูดล้มลงมือกำสายไฟแน่น ปลั๊กและตู้ไฟอยู่ในบ้านที่ล็อกอยู่ ตัดไฟทันทีไม่ได้",
+  goal:"ช่วยเหลืออย่างปลอดภัยตามลำดับ ภายใน 30 วินาที",
+  steps:[
+   {id:"warn",label:"📢 ตั้งสติ ห้ามจับตัว และกันคนอื่นออกจากจุดเปียก",topic:"rescue",done:"กันคนออกจากจุดเปียกแล้ว ไม่มีใครจับตัวผู้ประสบภัย"},
+   {id:"dry",label:"👞 สวมรองเท้าพื้นยาง ยืนบนพื้นที่แห้งสนิท",topic:"rescue",need:["warn"],done:"ยืนบนพื้นแห้ง สวมรองเท้าพื้นยางแล้ว"},
+   {id:"pvc",label:"🟫 ใช้ท่อ PVC แห้ง เขี่ยสายไฟออกจากตัว",topic:"rescue",need:["dry"],done:"เขี่ยสายไฟออกแล้ว"},
+   {id:"pull",label:"🧣 ใช้ผ้าขาวม้าแห้ง คล้องดึงออกมาจุดปลอดภัย",topic:"rescue",need:["pvc"],done:"นำผู้ประสบภัยออกมาจุดปลอดภัยแล้ว"},
+   {id:"call",label:"📞 ตรวจการหายใจ แล้วโทร 1669",topic:"rescue",need:["pull"],done:"โทรแจ้ง 1669 แล้ว"}
+  ],
+  traps:[
+   {label:"✋ วิ่งเข้าไปใช้มือเปล่าดึงแขนออกทันที",topic:"rescue",why:"ร่างกายผู้ถูกไฟดูดเป็นตัวนำไฟฟ้า ผู้ช่วยจะถูกดูดตามไปด้วย"},
+   {label:"🔩 ใช้ท่อเหล็กเขี่ยสายไฟ",topic:"rescue",why:"เหล็กนำไฟฟ้า ต้องใช้ฉนวนแห้ง เช่น ท่อ PVC แห้ง หรือไม้แห้ง"},
+   {label:"💦 สาดน้ำใส่จุดที่ไฟช็อต",topic:"rescue",why:"น้ำนำไฟฟ้า กระแสจะไหลมาที่ผู้สาดน้ำ"},
+   {label:"📞 โทร 191 แจ้งตำรวจ",topic:"rescue",why:"ผู้บาดเจ็บต้องโทร 1669 (สายด่วนการแพทย์ฉุกเฉิน)"}
+  ],
+  scene:(d)=>`<svg viewBox="0 0 400 160" role="img" aria-label="สถานการณ์ไฟดูด">
+     <ellipse cx="170" cy="128" rx="120" ry="20" fill="#9fd0f2" opacity=".8"/><text x="120" y="152" font-size="10">แอ่งน้ำ</text>
+     <path d="M20 120 C60 110, 90 130, ${d.pvc?'150 60':'170 118'}" stroke="#222" stroke-width="4" fill="none"/>
+     ${d.pvc?'':'<text x="150" y="100" font-size="16">⚡</text>'}
+     <g transform="translate(${d.pull?250:150},${d.pull?100:108})"><circle cx="0" cy="0" r="9" fill="#e8b98c"/><rect x="8" y="-5" width="46" height="12" rx="6" fill="#7a8fb5"/></g>
+     ${d.pull?'<text x="276" y="92" font-size="10">จุดปลอดภัย</text>':''}
+     <g transform="translate(330,${d.dry?70:100})"><circle cx="0" cy="0" r="9" fill="#e8b98c"/><rect x="-6" y="9" width="12" height="28" rx="4" fill="#1f5fbf"/>${d.dry?'<rect x="-9" y="37" width="18" height="6" fill="#333"/>':''}</g>
+     <text x="330" y="40" font-size="10" text-anchor="middle">${d.dry?'ผู้ช่วยยืนจุดแห้ง':'ผู้ช่วย'}</text>
+     ${d.pvc&&!d.pull?'<line x1="320" y1="80" x2="170" y2="80" stroke="#8d6e63" stroke-width="5"/>':''}
+     ${d.warn?'<text x="12" y="22" font-size="11" fill="#c4372f">📢 ห้ามจับ! ถอยออกจากน้ำ</text>':''}
+     ${d.call?'<text x="230" y="22" font-size="12" fill="#1e8a4c" font-weight="700">📞 1669 รับแจ้งแล้ว</text>':''}
+    </svg>`}
+];
+const LIMIT = 30;
+// เหรียญตามระดับคะแนนภารกิจ
+const MEDALS={4:{c:"g",e:"🥇",n:"เหรียญทอง"},3:{c:"s",e:"🥈",n:"เหรียญเงิน"},2:{c:"b",e:"🥉",n:"เหรียญทองแดง"},1:{c:"n",e:"🔧",n:"ผ่านภารกิจ"}}; // เวลาเกณฑ์ต่อภารกิจ (วินาที)
+
+/* =========================================================
+   ส่วนที่ 2: สถานะการเรียน (บันทึกในเครื่องชั่วคราว กันหน้ารีเฟรชแล้วหาย)
+   ========================================================= */
+const KEY = "lp2_safety_v1";
+const STAGES = ["ลงชื่อ","ก่อนเรียน","บทเรียน","แบบจำลอง","หลังเรียน","สรุปผล"];
+let S;
+function fresh(){ return {stage:0, student:null, startAt:null, pre:null, lesson:{part:0,page:0,checks:{},orderOk:null},
+  sim:{m:0, res:[]}, post:{attempts:0, last:null}, endAt:null}; }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+function load(){ try{ const v=JSON.parse(localStorage.getItem(KEY)); if(v && v.stage!==undefined) return v; }catch(e){} return fresh(); }
+S = load();
+
+/* ---------- เครื่องมือช่วย ---------- */
+const $ = (sel,el=document)=>el.querySelector(sel);
+const app = $("#app");
+const TH = ["ก","ข","ค","ง"];
+const esc = s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+function thaiTime(ts){ try{ return new Date(ts).toLocaleString("th-TH",{dateStyle:"medium",timeStyle:"short"}); }catch(e){ return new Date(ts).toLocaleString(); } }
+function go(stage){ S.stage=stage; save(); render(); window.scrollTo(0,0); }
+
+/* ---------- ยศช่าง (คำนวณ XP จากความคืบหน้า) ---------- */
+const RANKS=[{n:"ช่างฝึกหัด",i:"🔰",xp:0},{n:"ผู้ช่วยช่าง",i:"🔧",xp:350},{n:"ช่างชำนาญการ",i:"🛠️",xp:750},{n:"หัวหน้าช่าง",i:"👷",xp:1150}];
+function calcXP(){
+  let x=0; if(S.pre) x+=50;                                   // ทำแบบทดสอบก่อนเรียน
+  LESSON.forEach((p,pi)=>{ if(S.lesson.part>pi||S.stage>2) x+=100;   // เรียนจบแต่ละตอน
+    p.checks.forEach((q,qi)=>{ if(S.lesson.checks[pi+"-"+qi]) x+=20; }); }); // ตอบถูกครั้งแรก
+  if(S.lesson.orderOk) x+=20;
+  S.sim.res.forEach(r=>{ if(r) x+=r.level*50; });             // คะแนนภารกิจ x 50
+  if(S.post.last && S.post.last.score>=PASS) x+=200;          // ผ่านหลังเรียน
+  return x;
+}
+const rankIdx=x=>RANKS.reduce((k,r,i)=>x>=r.xp?i:k,0);
+function updateRank(){
+  const bar=$("#rankbar"); if(!S.student){ bar.style.display="none"; return; }
+  const x=calcXP(), i=rankIdx(x), R=RANKS[i], nx=RANKS[i+1];
+  const pct = nx ? (x-R.xp)/(nx.xp-R.xp)*100 : 100;
+  bar.style.display="";
+  bar.innerHTML=`<span class="rank-ico">${R.i}</span><span class="rank-name">${R.n}</span>
+    <div class="xp"><div class="lb"><span>XP ${x}</span><span>${nx?'ยศถัดไป: '+nx.n+' ('+nx.xp+')':'ยศสูงสุดแล้ว!'}</span></div><div class="bar"><i style="width:${pct}%"></i></div></div>`;
+  if(S.rankShown===undefined) S.rankShown=i;
+  if(i>S.rankShown){ S.rankShown=i; save(); toast(`${R.i} เลื่อนยศเป็น<br><b>${R.n}</b>`); confetti(40); }
+}
+/* ---------- เอฟเฟกต์ ---------- */
+function toast(html){ const t=document.createElement("div"); t.className="toast"; t.innerHTML=html; document.body.appendChild(t); setTimeout(()=>t.remove(),3300); }
+function confetti(n){ const cols=["#ffc400","#34d27b","#5fb3ff","#ff5a4f","#fff"];
+  for(let k=0;k<n;k++){ const c=document.createElement("div"); c.className="cf"; c.style.left=Math.random()*100+"vw";
+    c.style.background=cols[k%cols.length]; c.style.animationDuration=(1.6+Math.random()*1.6)+"s"; c.style.animationDelay=Math.random()*.4+"s";
+    document.body.appendChild(c); setTimeout(()=>c.remove(),3600); } }
+// อนุภาคในจอภาพจำลอง: spark = ประกายไฟ, drop = หยดน้ำ, star = ดาวสำเร็จ
+function burst(el,type,n){ if(!el) return; n=n||14; const w=el.clientWidth, h=el.clientHeight;
+  for(let k=0;k<n;k++){ const d=document.createElement("i"); d.className="pt "+type;
+    d.style.left=(w*(.3+Math.random()*.4))+"px"; d.style.top=(h*(.3+Math.random()*.3))+"px";
+    const a=Math.random()*Math.PI*2, r=40+Math.random()*70; d.style.setProperty("--dx",Math.cos(a)*r+"px"); d.style.setProperty("--dy",(Math.sin(a)*r+(type==="drop"?40:0))+"px");
+    el.appendChild(d); setTimeout(()=>d.remove(),800); } }
+function flash(el,ok){ if(!el) return; el.classList.remove("flash-ok","flash-bad"); void el.offsetWidth; el.classList.add(ok?"flash-ok":"flash-bad"); }
+
+function renderHeader(){
+  $("#who").textContent = S.student ? `👤 ${S.student.first} ${S.student.last}  ม.${S.student.room}  เลขที่ ${S.student.no}` : "";
+  updateRank();
+  $("#steps").innerHTML = STAGES.map((n,i)=>`<div class="${i<S.stage?'done':i===S.stage?'now':''}">${i<S.stage?'✓ ':''}${n}</div>`).join("");
+}
+function render(){
+  renderHeader();
+  // หน้าสรุปซ่อนหัวเว็บ เพื่อให้แคปได้ในหน้าจอเดียว
+  document.querySelector("header.top").style.display = S.stage===5?"none":"";
+  $("#steps").style.display = S.stage===5?"none":"";
+  [viewRegister,viewPre,viewLesson,viewSim,viewPost,viewSummary][S.stage]();
+}
+
+/* =========================================================
+   ส่วนที่ 3: หน้าลงชื่อเข้าเรียน
+   ========================================================= */
+function viewRegister(){
+  app.innerHTML = `<div class="card"><span class="tag">SAFETY WORKSHOP · CHECK-IN</span><h2 style="margin-top:6px">📝 ลงชื่อเข้าเรียน</h2>
+   <p class="muted">กรอกให้ครบก่อนเริ่มเรียน ชื่อจะแสดงในหน้าสรุปผลที่ส่งครู</p>
+   <div class="grid2"><div><label class="f" for="fn">ชื่อ</label><input id="fn" autocomplete="off" placeholder="เช่น สมชาย"></div>
+   <div><label class="f" for="ln">นามสกุล</label><input id="ln" autocomplete="off" placeholder="เช่น ใจดี"></div></div>
+   <div class="grid2"><div><label class="f" for="rm">ชั้น</label><select id="rm"><option value="">-- เลือกห้อง --</option>${Array.from({length:12},(_,i)=>`<option>4/${i+1}</option>`).join("")}</select></div>
+   <div><label class="f" for="no">เลขที่</label><input id="no" type="number" inputmode="numeric" min="1" max="60" placeholder="1–60"></div></div>
+   <div class="err" id="err"></div>
+   <h3>ขั้นตอนการเรียน</h3>
+   <ol class="tight"><li>แบบทดสอบก่อนเรียน 10 ข้อ</li><li>บทเรียน 4 ตอน (มีคำถามเช็กความเข้าใจ)</li><li>แบบจำลองปฏิบัติ 3 ภารกิจ (จับเวลา 30 วินาที)</li><li>แบบทดสอบหลังเรียน 10 ข้อ (ผ่านเมื่อได้ 8 ข้อขึ้นไป)</li><li>หน้าสรุปผล → <b>แคปหน้าจอส่งครู</b></li></ol>
+   <div class="key small">🏅 เรียนให้ครบเพื่อสะสม XP เลื่อนยศจาก <b>🔰 ช่างฝึกหัด</b> → 🔧 ผู้ช่วยช่าง → 🛠️ ช่างชำนาญการ → <b>👷 หัวหน้าช่าง</b> และเก็บเหรียญจากภารกิจ</div>
+   <button class="btn full" id="go">เริ่มเรียน ▶</button></div>`;
+  $("#go").onclick = ()=>{
+    const fn=$("#fn").value.trim(), ln=$("#ln").value.trim(), rm=$("#rm").value, no=parseInt($("#no").value,10);
+    // ตรวจข้อมูลที่กรอก
+    if(fn.length<2) return $("#err").textContent="กรุณากรอกชื่อ";
+    if(ln.length<2) return $("#err").textContent="กรุณากรอกนามสกุล";
+    if(!rm) return $("#err").textContent="กรุณาเลือกห้อง";
+    if(!(no>=1 && no<=60)) return $("#err").textContent="เลขที่ต้องเป็นตัวเลข 1–60";
+    S.student={first:fn,last:ln,room:rm,no}; S.startAt=Date.now(); go(1);
+  };
+}
+
+/* =========================================================
+   ส่วนที่ 4: แบบทดสอบ (ใช้ทั้งก่อนเรียนและหลังเรียน สลับข้อและตัวเลือกทุกครั้ง)
+   ========================================================= */
+function runTest(kind, onDone){
+  // สร้างชุดข้อสอบแบบสลับ
+  const order = shuffle(TEST.map((_,i)=>i)).map(i=>({i, opts:shuffle([0,1,2,3])}));
+  const ans = [];
+  let k = 0;
+  const show = ()=>{
+    const it = order[k], Q = TEST[it.i];
+    app.innerHTML = `<div class="card"><div class="row between"><h2>${kind==='pre'?'📋 แบบทดสอบก่อนเรียน':'🏁 แบบทดสอบหลังเรียน'}</h2><span class="muted">ข้อ ${k+1}/10</span></div>
+     <div class="pbar"><i style="width:${k*10}%"></i></div>
+     <p><b>${k+1}. ${esc(Q.q)}</b></p>
+     ${it.opts.map((o,j)=>`<button class="opt" data-o="${o}"><b>${TH[j]}.</b>${esc(Q.ch[o])}</button>`).join("")}
+     <div class="row end" style="margin-top:8px"><button class="btn" id="nx" disabled>${k<9?'ข้อต่อไป ▶':'ส่งคำตอบ ✔'}</button></div></div>`;
+    let pick=null;
+    app.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{ app.querySelectorAll(".opt").forEach(x=>x.classList.remove("sel")); b.classList.add("sel"); pick=+b.dataset.o; $("#nx").disabled=false; });
+    $("#nx").onclick=()=>{ ans.push({i:it.i, pick, ok:pick===Q.a}); k++; if(k<10) show(); else onDone(ans); };
+  };
+  show();
+}
+function viewPre(){
+  if(S.pre){ // ทำแล้ว แสดงผล
+    app.innerHTML = `<div class="card"><h2>ผลก่อนเรียน: ${S.pre.score}/10</h2>
+     <p>ไม่ต้องกังวลกับคะแนนนี้ เป็นการวัดพื้นฐานเดิม หลังเรียนจะนำมาเทียบพัฒนาการ</p>
+     <button class="btn full" id="go">เข้าสู่บทเรียน ▶</button></div>`;
+    $("#go").onclick=()=>go(2); return;
+  }
+  app.innerHTML = `<div class="card"><h2>📋 แบบทดสอบก่อนเรียน</h2><p>ปรนัย 4 ตัวเลือก 10 ข้อ เลือกคำตอบที่ถูกที่สุดเพียงข้อเดียว</p>
+   <p class="muted">ตอบตามความรู้เดิมของตัวเอง ยังไม่ต้องรู้ทุกข้อ</p><button class="btn full" id="st">เริ่มทำ ▶</button></div>`;
+  $("#st").onclick=()=>runTest('pre', ans=>{ S.pre={score:ans.filter(a=>a.ok).length, ans}; save(); viewPre(); });
+}
+
+/* =========================================================
+   ส่วนที่ 5: บทเรียน 4 ตอน
+   ========================================================= */
+function viewLesson(){
+  const L = S.lesson, P = LESSON[L.part];
+  const nPages = P.pages.length;
+  const totalUnits = LESSON.reduce((s,p)=>s+p.pages.length+1,0);
+  const doneUnits = LESSON.slice(0,L.part).reduce((s,p)=>s+p.pages.length+1,0) + L.page;
+  if(L.page < nPages){
+    app.innerHTML = `<div class="card"><div class="muted">บทเรียน · หน้า ${L.page+1}/${nPages}</div>
+      <div class="pbar"><i style="width:${doneUnits/totalUnits*100}%"></i></div>
+      <h2>${P.title}</h2>${P.pages[L.page]()}
+      <div class="row between" style="margin-top:12px"><button class="btn ghost" id="bk" ${L.part===0&&L.page===0?'disabled':''}>◀ ย้อนกลับ</button>
+      <button class="btn" id="nx">${L.page<nPages-1?'ถัดไป ▶':'ทำคำถามเช็กความเข้าใจ ▶'}</button></div></div>`;
+    wireLessonWidgets();
+    $("#nx").onclick=()=>{ L.page++; save(); viewLesson(); window.scrollTo(0,0); };
+    $("#bk").onclick=()=>{ if(L.page>0) L.page--; else if(L.part>0){ L.part--; L.page=LESSON[L.part].pages.length; } save(); viewLesson(); };
+    return;
+  }
+  // หน้าคำถามเช็กความเข้าใจ: ต้องตอบถูกทุกข้อจึงไปต่อ (บันทึกว่าตอบถูกครั้งแรกหรือไม่)
+  const qs = P.checks;
+  app.innerHTML = `<div class="card"><div class="muted">เช็กความเข้าใจ · ${P.title}</div>
+    <div class="pbar"><i style="width:${doneUnits/totalUnits*100}%"></i></div>
+    <h2>✅ เช็กความเข้าใจ</h2><p class="muted">ตอบให้ถูกทุกข้อ ถ้าผิดอ่านคำอธิบายแล้วเลือกใหม่ได้</p>
+    ${P.order?`<div id="ord"></div>`:''}
+    ${qs.map((q,qi)=>`<div class="ck" data-q="${qi}"><p><b>${qi+1}. ${esc(q.q)}</b></p>
+      ${shuffle(q.ch.map((_,ci)=>ci)).map((ci,j)=>`<button class="opt" data-c="${ci}"><b>${TH[j]}.</b>${esc(q.ch[ci])}</button>`).join("")}<div class="fbx"></div></div>`).join("")}
+    <div class="row between" style="margin-top:12px"><button class="btn ghost" id="bk">◀ ทบทวนเนื้อหา</button>
+    <button class="btn" id="nx" disabled>${L.part<LESSON.length-1?'ไปตอนต่อไป ▶':'ไปที่แบบจำลอง ▶'}</button></div></div>`;
+  const solved = new Set();
+  const need = qs.length + (P.order?1:0);
+  const check = ()=>{ $("#nx").disabled = solved.size<need; };
+  app.querySelectorAll(".ck").forEach(box=>{
+    const qi=+box.dataset.q, q=qs[qi], id=L.part+"-"+qi;
+    if(L.checks[id]!==undefined && L.checks[id+"_solved"]){ // เคยตอบถูกแล้ว
+      box.querySelector(`[data-c="${q.a}"]`).classList.add("right"); solved.add(id);
+      box.querySelector(".fbx").innerHTML=`<div class="fb ok">✔ ${esc(q.why)}</div>`;
+    }
+    box.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+      if(solved.has(id)) return;
+      const c=+b.dataset.c, ok=c===q.a;
+      if(L.checks[id]===undefined) L.checks[id]=ok; // ครั้งแรกเท่านั้นที่นับคะแนน
+      if(ok){ b.classList.add("right"); solved.add(id); L.checks[id+"_solved"]=true; box.querySelector(".fbx").innerHTML=`<div class="fb ok">✔ ถูกต้อง! ${esc(q.why)}</div>`; }
+      else { b.classList.add("wrong"); box.querySelector(".fbx").innerHTML=`<div class="fb bad">✘ ยังไม่ถูก ลองอีกครั้ง</div>`; }
+      save(); check(); updateRank();
+    });
+  });
+  if(P.order) orderGame($("#ord"), P.order, ok=>{ if(L.orderOk===null) L.orderOk=ok; },
+      ()=>{ solved.add("order"); save(); check(); updateRank(); }, L.orderOk!==null && L.orderSolved, ()=>{L.orderSolved=true;});
+  check();
+  $("#bk").onclick=()=>{ L.page=nPages-1; save(); viewLesson(); };
+  $("#nx").onclick=()=>{ if(L.part<LESSON.length-1){ L.part++; L.page=0; save(); viewLesson(); window.scrollTo(0,0);} else go(3); };
+}
+// เกมเรียงลำดับคาถา 4 ขั้น
+function orderGame(el, O, onFirst, onSolved, already, markSolved){
+  if(already){ el.innerHTML=`<p><b>${O.q}</b></p><div class="fb ok">✔ ${O.items.map((t,i)=>(i+1)+'. '+t).join(' → ')}</div>`; onSolved(); return; }
+  let pos=0, firstTry=true; const cards=shuffle(O.items);
+  el.innerHTML=`<p><b>${O.q}</b></p><div class="acts order-cards">${cards.map(c=>`<button class="act" data-t="${esc(c)}">${esc(c)}</button>`).join("")}</div><div class="fbx"></div>`;
+  el.querySelectorAll(".act").forEach(b=>b.onclick=()=>{
+    if(b.classList.contains("done")) return;
+    if(b.dataset.t===O.items[pos]){ pos++; b.classList.add("done"); b.textContent=pos+". "+b.dataset.t;
+      if(pos===O.items.length){ onFirst(firstTry); markSolved(); el.querySelector(".fbx").innerHTML=`<div class="fb ok">✔ เรียงถูกต้อง!</div>`; onSolved(); } }
+    else { firstTry=false; b.classList.remove("shake"); void b.offsetWidth; b.classList.add("shake");
+      el.querySelector(".fbx").innerHTML=`<div class="fb bad">✘ ยังไม่ใช่ขั้นที่ ${pos+1} ลองคิดใหม่</div>`; }
+  });
+}
+// ปุ่ม interactive ในหน้าบทเรียน
+function wireLessonWidgets(){
+  const info={main:"<b>เมนเบรกเกอร์</b>: สวิตช์ตัวใหญ่ที่สุด ควบคุมไฟทั้งบ้าน ตัดไฟเมื่อใช้ไฟรวมเกินพิกัดหรือลัดวงจรใหญ่",
+    rcd:"<b>เครื่องตัดไฟรั่ว (RCD/RCBO)</b>: มีปุ่ม T ตัดไฟในเสี้ยววินาทีเมื่อมีไฟรั่วลงดินหรือดูดคน",
+    mcb:"<b>เบรกเกอร์ย่อย (MCB)</b>: แบ่งคุมแต่ละวงจร เช่น แสงสว่างชั้นล่าง เต้ารับครัว เครื่องทำน้ำอุ่น แอร์"};
+  app.querySelectorAll("[data-pp]").forEach(b=>b.onclick=()=>{ $("#pPanel").innerHTML=panelSVG({hl:b.dataset.pp}); $("#ppInfo").innerHTML=info[b.dataset.pp]; });
+  if($("#btnT")){ $("#btnT").onclick=()=>{ $("#tPanel").innerHTML=panelSVG({rcd:'off'}); burst($("#tPanel"),"spark"); $("#tInfo").className="fb ok"; $("#tInfo").innerHTML="คันโยกดีดลง OFF ทันที ✔ แสดงว่าเครื่องตัดไฟรั่วทำงานปกติ (ถ้าไม่ดีด ต้องให้ช่างตรวจ)"; };
+    $("#btnTreset").onclick=()=>{ $("#tPanel").innerHTML=panelSVG({}); $("#tInfo").className="fb info"; $("#tInfo").textContent="ดันกลับ ON แล้ว"; }; }
+  if($("#trip1")){ let st=0; const seq=["trip1","trip2","trip3"];
+    const msg=["✔ ถอดปลั๊กเครื่องใช้ไฟฟ้าต้นเหตุแล้ว และตรวจว่าไม่มีกลิ่นไหม้","✔ ดึงคันโยกลง OFF สุด เพื่อรีเซ็ตสปริง","✔ ดันขึ้น ON ไฟกลับมาใช้ได้ตามปกติ"];
+    const states=[['on','trip','on'],['on','off','on'],['on','on','on']];
+    seq.forEach((id,i)=>$("#"+id).onclick=()=>{
+      if(i===st){ $("#tripPanel").innerHTML=panelSVG({mcb:states[i]}); flash($("#tripPanel"),true); if(i===2) burst($("#tripPanel"),"star"); $("#tripInfo").className="fb ok"; $("#tripInfo").textContent=msg[i]; st++; $("#"+id).disabled=true; }
+      else { flash($("#tripPanel"),false); $("#tripInfo").className="fb bad"; $("#tripInfo").textContent= i===2&&st===0 ? "✘ ห้ามดันขึ้นทันที! ต้องถอดปลั๊กต้นเหตุก่อน" : "✘ ยังไม่ถึงขั้นนี้ ทำขั้นก่อนหน้าก่อน"; }
+    }); }
+  if($("#bvBtn")){ let open=true; $("#bvBtn").onclick=()=>{ open=!open; $("#bv").innerHTML=ballSVG(open); if(!open) burst($("#bv"),"drop",8); }; }
+  if($("#gvCW")){ let t=0; const upd=(m,c)=>{ $("#gv").innerHTML=gateSVG(t); $("#gvInfo").className="fb "+c; $("#gvInfo").textContent=m; };
+    $("#gvCW").onclick=()=>{ if(t<3){t++;} if(t>=3) burst($("#gv"),"drop",8); upd(t>=3?"✔ หมุนตามเข็มจนสุดเกลียว ลิ้นวาล์วลงมาปิดน้ำสนิท":"หมุนตามเข็ม: ลิ้นวาล์วเลื่อนลง ("+t+"/3 รอบ)", t>=3?"ok":"info"); };
+    $("#gvCCW").onclick=()=>{ if(t>0){t--; upd("หมุนทวนเข็ม: ลิ้นวาล์วยกขึ้น น้ำไหลมากขึ้น","warn");} else upd("หมุนทวนเข็ม = เปิด วาล์วเปิดสุดอยู่แล้ว","warn"); }; }
+}
+
+/* =========================================================
+   ส่วนที่ 6: แบบจำลอง 3 ภารกิจ
+   ========================================================= */
+let simTimer=null;
+function viewSim(){
+  clearInterval(simTimer);
+  const mi = S.sim.m;
+  if(mi>=MISSIONS.length){ // ทำครบแล้ว
+    const tot=S.sim.res.reduce((s,r)=>s+r.level,0);
+    app.innerHTML=`<div class="card"><h2>🎯 แบบจำลองครบ 3 ภารกิจ</h2>
+     ${S.sim.res.map((r,i)=>`<p>${MEDALS[r.level].e} ${MISSIONS[i].title}: <b>${r.level}/4</b> <span class="muted">(${r.time} วินาที, ผิด ${r.mistakes} ครั้ง)</span></p>`).join("")}
+     <p><b>รวม ${tot}/12 คะแนน</b></p><button class="btn full" id="go">ไปทำแบบทดสอบหลังเรียน ▶</button></div>`;
+    $("#go").onclick=()=>go(4); return;
+  }
+  const M = MISSIONS[mi];
+  app.innerHTML=`<div class="card"><span class="tag">MISSION ${mi+1}/3</span><h2 style="margin-top:6px">${M.title}</h2>
+    <div class="fb warn">📍 <b>สถานการณ์</b>: ${M.story}</div><p>🎯 ${M.goal}</p>
+    <div class="scene">${M.scene({})}</div>
+    <p class="muted">เมื่อกดเริ่ม จะมีปุ่มการกระทำหลายแบบ (มีทั้งถูกและผิด) ให้แตะทีละปุ่มตามลำดับที่ถูกต้อง เวลาจะเริ่มนับทันที</p>
+    <button class="btn full" id="st">เริ่มภารกิจ ⏱</button></div>`;
+  $("#st").onclick=()=>playMission(mi);
+}
+function playMission(mi){
+  const M=MISSIONS[mi], d={}, stepPts={}; let mistakes=0;
+  const t0=Date.now();
+  const acts=shuffle([...M.steps.map(s=>({...s,kind:"step"})), ...M.traps.map(t=>({...t,kind:"trap"}))]);
+  M.steps.forEach(s=>stepPts[s.id]=1); // เริ่มต้นได้ 1 คะแนนต่อขั้น ถ้าทำผิดระหว่างทำขั้นนั้นจะเป็น 0
+  const current=()=>M.steps.filter(s=>!d[s.id] && (s.need||[]).every(n=>d[n]));
+  app.innerHTML=`<div class="card"><div class="muted">แบบจำลอง ${mi+1}/3</div><h2>${M.title}</h2>
+    <div class="hud"><span id="tm">⏱ 0 วิ</span><span id="mk">✘ ผิด 0</span><span id="pg">✔ 0/${M.steps.length}</span></div>
+    <div class="scene" id="sc">${M.scene(d)}</div><div id="fb" class="fb info">เลือกการกระทำแรก</div>
+    <ul class="checklist" id="cl"></ul>
+    <div class="acts">${acts.map((a,i)=>`<button class="act" data-i="${i}">${esc(a.label)}</button>`).join("")}</div></div>`;
+  simTimer=setInterval(()=>{ const s=Math.floor((Date.now()-t0)/1000); $("#tm").textContent=`⏱ ${s} วิ`; $("#tm").classList.toggle("late",s>LIMIT); },250);
+  const penalize=()=>{ mistakes++; current().forEach(s=>stepPts[s.id]=0); $("#mk").textContent=`✘ ผิด ${mistakes}`; };
+  app.querySelectorAll(".act").forEach(b=>b.onclick=()=>{
+    const a=acts[+b.dataset.i]; if(b.classList.contains("done")) return;
+    const shake=()=>{ b.classList.remove("shake"); void b.offsetWidth; b.classList.add("shake"); };
+    if(a.kind==="trap"){ penalize(); shake(); flash($("#sc"),false); if(navigator.vibrate) try{navigator.vibrate(120);}catch(e){} $("#fb").className="fb bad"; $("#fb").innerHTML=`✘ <b>อันตราย!</b> ${esc(a.why)}`; return; }
+    if(!(a.need||[]).every(n=>d[n])){ penalize(); shake(); $("#fb").className="fb bad"; $("#fb").innerHTML="✘ วิธีถูก แต่ <b>ยังไม่ถึงลำดับนี้</b> คิดก่อนว่าต้องทำอะไรก่อน"; return; }
+    d[a.id]=true; b.classList.add("done");
+    const n=M.steps.filter(s=>d[s.id]).length;
+    $("#sc").innerHTML=M.scene(d); flash($("#sc"),true); burst($("#sc"), a.topic==="elec"?"spark":mi===1?"drop":"star"); $("#pg").textContent=`✔ ${n}/${M.steps.length}`;
+    $("#fb").className="fb ok"; $("#fb").textContent="✔ "+a.done;
+    $("#cl").innerHTML+=`<li>✅ ${n}. ${esc(a.done)}</li>`;
+    if(n===M.steps.length) finish();
+  });
+  function finish(){
+    clearInterval(simTimer);
+    const time=Math.round((Date.now()-t0)/1000);
+    // เกณฑ์ให้คะแนน 4 ระดับ (เทียบรูบริกในแผน: รวม 3 ภารกิจ = 12 คะแนน)
+    let level = (mistakes===0 && time<=LIMIT)?4 : ((mistakes<=1 && time<=LIMIT) || mistakes===0)?3 : mistakes<=3?2 : 1;
+    const topics={}; M.steps.forEach(s=>{ topics[s.topic]=topics[s.topic]||[0,0]; topics[s.topic][0]+=stepPts[s.id]; topics[s.topic][1]++; });
+    S.sim.res[mi]={level,time,mistakes,topics}; save(); updateRank();
+    app.querySelectorAll(".act").forEach(x=>x.disabled=true);
+    const word=["","ปรับปรุง","พอใช้","ดี","ดีมาก"][level];
+    const MD=MEDALS[level];
+    app.insertAdjacentHTML("beforeend",`<div class="card center"><div class="tag">MISSION COMPLETE</div>
+      <div><span class="medal ${MD.c}">${MD.e}</span></div>
+      <h2>${MD.n} · ${level}/4 (${word})</h2>
+      <p>⏱ <b>${time}</b> วินาที ${time<=LIMIT?'✔ ไม่เกินเกณฑ์ 30 วินาที':'✘ เกินเกณฑ์ 30 วินาที'} · ✘ ทำผิด <b>${mistakes}</b> ครั้ง · <b>+${level*50} XP</b></p>
+      <p class="muted small">🥇 ไม่ผิดและไม่เกิน 30 วิ · 🥈 ผิด 1 ครั้ง หรือเกินเวลา · 🥉 ผิด 2–3 ครั้ง · 🔧 ผิดมากกว่า 3 ครั้ง</p>
+      <button class="btn full" id="nx">${mi<MISSIONS.length-1?'ไปภารกิจต่อไป ▶':'ดูผลแบบจำลอง ▶'}</button></div>`);
+    if(level===4) confetti(50);
+    $("#nx").scrollIntoView({behavior:"smooth",block:"center"});
+    $("#nx").onclick=()=>{ S.sim.m++; save(); viewSim(); window.scrollTo(0,0); };
+  }
+}
+
+/* =========================================================
+   ส่วนที่ 7: แบบทดสอบหลังเรียน (ผ่านเมื่อ ≥ 8/10 ถ้าไม่ผ่านสอบใหม่ได้)
+   ========================================================= */
+function viewPost(){
+  const last=S.post.last;
+  if(!last){
+    app.innerHTML=`<div class="card"><h2>🏁 แบบทดสอบหลังเรียน</h2><p>10 ข้อ ต้องได้ <b>8 ข้อขึ้นไป (ร้อยละ 80)</b> จึงผ่านเกณฑ์</p>
+     <p class="muted">ข้อสอบชุดเดียวกับก่อนเรียน แต่สลับลำดับข้อและตัวเลือก ตั้งใจทำด้วยความซื่อสัตย์</p><button class="btn full" id="st">เริ่มทำ ▶</button></div>`;
+    $("#st").onclick=startPost; return;
+  }
+  const pass=last.score>=PASS, wrong=last.ans.filter(a=>!a.ok);
+  if(pass && !S.post.cel){ S.post.cel=S.post.attempts; save(); setTimeout(()=>confetti(60),200); }
+  app.innerHTML=`<div class="card"><h2>${pass?'🎉 ผ่านเกณฑ์!':'ยังไม่ผ่านเกณฑ์'} หลังเรียนได้ ${last.score}/10</h2>
+   <p class="muted">ครั้งที่สอบ: ${S.post.attempts}</p>
+   ${wrong.length?`<h3>ข้อที่ตอบผิด</h3>${wrong.map(w=>{const Q=TEST[w.i]; return `<div class="fb bad small"><b>${esc(Q.q)}</b><br>✔ คำตอบที่ถูก: ${esc(Q.ch[Q.a])}<br>💡 ${esc(Q.why)}</div>`;}).join("")}`:'<div class="fb ok">ตอบถูกทุกข้อ ยอดเยี่ยม!</div>'}
+   <div class="row" style="margin-top:12px">
+    ${pass?`<button class="btn full ok" id="sum">ดูหน้าสรุปผล ▶</button>`:
+      `<button class="btn" id="re">📖 ทบทวนแล้วสอบใหม่</button><button class="btn ghost" id="sum">ไปหน้าสรุปผล (ยังไม่ผ่าน)</button>`}</div></div>`;
+  $("#sum").onclick=()=>{ S.endAt=Date.now(); go(5); };
+  if($("#re")) $("#re").onclick=startPost;
+}
+function startPost(){ runTest('post', ans=>{ S.post.attempts++; S.post.last={score:ans.filter(a=>a.ok).length, ans}; save(); viewPost(); window.scrollTo(0,0); }); }
+
+/* =========================================================
+   ส่วนที่ 8: หน้าสรุปผล + วิเคราะห์จุดเด่น/จุดที่ควรพัฒนา (สำหรับแคปส่งครู)
+   ========================================================= */
+function analyze(){
+  // รวมคะแนนแต่ละด้าน = แบบทดสอบหลังเรียน + คำถามเช็กความเข้าใจ (ตอบถูกครั้งแรก) + ขั้นตอนในแบบจำลอง (ทำถูกโดยไม่ผิด)
+  const T={}; Object.keys(TOPICS).forEach(k=>T[k]={got:0,max:0});
+  S.post.last.ans.forEach(a=>{ const t=TEST[a.i].t; T[t].max++; if(a.ok) T[t].got++; });
+  LESSON.forEach((p,pi)=>{ p.checks.forEach((q,qi)=>{ const v=S.lesson.checks[pi+"-"+qi]; T[p.topic].max++; if(v) T[p.topic].got++; });
+    if(p.order){ T[p.topic].max++; if(S.lesson.orderOk) T[p.topic].got++; } });
+  S.sim.res.forEach(r=>{ Object.entries(r.topics).forEach(([k,v])=>{ T[k].got+=v[0]; T[k].max+=v[1]; }); });
+  return Object.entries(T).map(([k,v])=>({k, name:TOPICS[k].name, pct:Math.round(v.got/v.max*100), got:v.got, max:v.max}));
+}
+function viewSummary(){
+  if(!S.post.last){ go(4); return; }
+  const st=S.student, pre=S.pre.score, post=S.post.last.score, gain=post-pre;
+  const simTot=S.sim.res.reduce((s,r)=>s+r.level,0);
+  const sScore = simTot>=10?1 : simTot>=6?0.5 : 0; // เกณฑ์แปลงคะแนน S ตามแผน
+  const pass=post>=PASS;
+  const A=analyze().sort((a,b)=>b.pct-a.pct);
+  const lv=p=>p>=80?['เก่ง','ok','#34d27b']:p>=60?['พอใช้','warn','#ffb020']:['ควรทบทวน','bad','#ff5a4f'];
+  const RK=RANKS[rankIdx(calcXP())];
+  const strong=A.filter(a=>a.pct>=80), weak=A.filter(a=>a.pct<80).sort((a,b)=>a.pct-b.pct);
+  const mins=Math.max(1,Math.round(((S.endAt||Date.now())-S.startAt)/60000));
+  app.innerHTML=`<div class="card sum" id="cap"><div class="hz"></div>
+   <div class="muted small">สรุปผลการเรียน · ง 30275 แผนที่ 2 กฎความปลอดภัยและการตัดระบบฉุกเฉิน</div>
+   <div class="hd"><div><div style="font-size:19px;font-weight:700">${esc(st.first)} ${esc(st.last)}</div>
+     <div class="small">ม.${esc(st.room)} เลขที่ ${st.no} · ${thaiTime(S.endAt||Date.now())} · ${mins} นาที</div></div>
+     <div><span class="badge ${pass?'ok':'bad'}">${pass?'✔ ผ่านเกณฑ์':'✘ ยังไม่ผ่าน'}</span></div></div>
+   <div class="stats"><div>ก่อนเรียน<b>${pre}/10</b></div><div>หลังเรียน<b>${post}/10</b></div>
+    <div>พัฒนาการ<b style="color:${gain>0?'#34d27b':gain<0?'#ff5a4f':''}">${gain>0?'+':''}${gain}</b></div><div>แบบจำลอง<b>${simTot}/12</b></div></div>
+   <div class="small">คะแนนเก็บ <b>K</b> ${pass?1:0}/1 · <b>S</b> ${sScore}/1 · <b>A</b> ครูประเมิน · สอบหลังเรียน ${S.post.attempts} ครั้ง</div>
+   <div class="row between small" style="margin-top:4px"><span>ยศ: <b style="color:var(--pri)">${RK.i} ${RK.n}</b> (${calcXP()} XP)</span>
+     <span class="muted">${S.sim.res.map((r,i)=>`<span class="mini-medals">${MEDALS[r.level].e}</span>${r.time}วิ/ผิด${r.mistakes}`).join(" ")}</span></div>
+   <div style="font-weight:700;margin-top:8px">📊 วิเคราะห์รายด้าน</div>
+   ${A.map(a=>{const L=lv(a.pct); return `<div class="tbar"><div class="lb"><span>${TOPICS[a.k].short}</span><span><b>${a.pct}%</b> <span class="pill ${L[1]}">${L[0]}</span></span></div>
+     <div class="bar"><i style="width:${a.pct}%;background:${L[2]}"></i></div></div>`;}).join("")}
+   <div class="fb ${strong.length?'ok':'info'} small" style="margin-top:8px;padding:6px 10px">💪 <b>เก่งด้าน:</b> ${strong.length?strong.map(a=>TOPICS[a.k].short).join(", "):'ยังไม่มีด้านที่ถึง 80%'}</div>
+   <div class="fb ${weak.length?'warn':'ok'} small" style="padding:6px 10px">📌 <b>ควรพัฒนา:</b> ${weak.length?weak.map(a=>`<br>• ${TOPICS[a.k].short}: ${TOPICS[a.k].tipS}`).join(""):'ไม่มี ทุกด้านผ่าน 80% แล้ว'}</div>
+   <div class="stamp">📸 แคปหน้าจอนี้ส่งครู</div></div>
+   <div class="card small"><b>วิธีแคปหน้าจอ</b><br>📱 มือถือ: กดปุ่มเปิด/ปิด + ลดเสียง พร้อมกัน<br>💻 คอมพิวเตอร์ (Windows): กด <b>Windows + Shift + S</b> แล้วลากคลุมกรอบสรุป
+   <div class="row" style="margin-top:10px">${!pass?'<button class="btn" id="re">📖 กลับไปสอบหลังเรียนใหม่</button>':''}<button class="btn ghost" id="nw">🔄 เริ่มใหม่สำหรับนักเรียนคนถัดไป</button></div>
+   <div id="cf"></div></div>`;
+  if($("#re")) $("#re").onclick=()=>go(4);
+  $("#nw").onclick=()=>{ $("#cf").innerHTML=`<div class="fb warn">ข้อมูลของ ${esc(st.first)} จะถูกล้าง แคปหน้าจอแล้วใช่ไหม? <div class="row" style="margin-top:6px"><button class="btn" id="yes">ใช่ ล้างและเริ่มใหม่</button><button class="btn ghost" id="no">ยกเลิก</button></div></div>`;
+    $("#yes").onclick=()=>{ S=fresh(); save(); render(); window.scrollTo(0,0); }; $("#no").onclick=()=>$("#cf").innerHTML=""; };
+}
+
+render();
+</script>
+</body>
+</html>
